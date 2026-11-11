@@ -1,0 +1,93 @@
+# Changelog
+
+This log uses the overlay's historical version numbers. The initial Git import contains the V27 baseline; earlier entries summarize local development milestones rather than Git tags or independently published releases.
+
+## Repository preparation — 2026-11-11
+
+### Added
+
+- English README with an Introduction, supported-mobile matrix and quick start.
+- English usage, troubleshooting, development and packaging guides.
+- A prioritized issue list with validation criteria for unfinished mechanics.
+- Reproducible dependency metadata, runtime preparation and portable-package scripts.
+- Portable existing tests for movement, target selection and recovery policy.
+
+### Packaging
+
+- Exclude personal settings, browser bindings, process status, shot archives, dependencies and runtime binaries from Git.
+- Generate clean browser configuration from example files during setup.
+- Retain third-party attribution and include runtime/dependency licenses in generated portable packages.
+
+## V27 — Grub — 2026-11-10
+
+### Added
+
+- Automatic Grub recognition and S1/S2/SS model selection.
+- Four S2 trajectories with separate angle and speed offsets, ranked by predicted target contacts.
+- Estimated terrain ricochets and rejection of candidate paths that hit the owner or a teammate.
+- Dashed post-contact trajectory segments to distinguish estimates.
+- A three-second S2 lifetime after the first bounce, based on four observed projectiles in one burst.
+- Grub modules in one-click loading and runtime health checks.
+
+### Fixed
+
+- Prevent side projectiles from contaminating the central S2 launch calibration.
+- Allow candidate solving at native projectile speeds above the shared solver's UI power range.
+
+### Remaining limitations
+
+- Left-facing S2 spread and historical terrain normals lack independent validation.
+- SS targets the first contact; rolling, repeated damage and a general SS timer are unresolved.
+
+## V26 — Raon Launcher — 2026-11-10
+
+### Added
+
+- Three separate S1 wave streams and predicted contact counts.
+- Two S2 projectile speeds with separate terrain landing markers.
+- SS terrain placement near the target's feet.
+- Match-specific calibration, movement/wind updates and bounded special-weather search.
+
+### Fixed
+
+- Correct Raon SS identification and separate airborne projectiles from mines and walkers.
+- Require actual terrain contact for mine/robot placement instead of counting an airborne body crossing.
+
+### Remaining limitations
+
+- Mine pursuit, walker movement, detonation and resulting damage are not modeled.
+
+## V25 — Nak — 2026-11-10
+
+### Added
+
+- Nak S1/SS trajectories and S2 terrain entry, underground motion and exit search.
+- A distinct underground path display and current-match calibration priority.
+- Initial estimates so aim does not require two new calibration shots after every wind change.
+
+### Fixed
+
+- Correct Nak SS bullet identification and exclude underground children from ordinary launch fitting.
+
+## V24 — Mirrors and random weather — 2026-11-08
+
+- Add estimated mirror reflection paths and reflection markers.
+- Extend paired Turtle S2 and split-SS calculations to mirror paths.
+- Continue ordinary calculations while random weather is unresolved, then use the revealed mirror/tornado effect.
+- Preserve explicit uncertainty for repeated reflections, elevated mirrors and combined weather.
+
+## V23 — Turtle performance — 2026-11-08
+
+- Prepare paired Turtle wave calculations together and reject unreachable paths earlier.
+- Cache repeated wave/tornado calculations and bound special-weather searches.
+- Retain the experimental status of tornado predictions; performance work does not establish shot accuracy.
+
+## Earlier local milestones
+
+- Turtle S1/S2/SS support, direct-impact and airborne-split SS modes, opening/release timing and fragment forecasts.
+- F9 panel visibility, separate trajectory visibility and persistent preferences.
+- Boomer reference methods, learned models and optional bot-room Auto Learn with stop conditions and progress reporting.
+- Aduka and ICE initial models, shot-change recalculation and wind/movement refreshes.
+- One-click Windows launcher, single-owner process control, automatic game-tab selection and reload/new-match recovery.
+
+Exact dates and version boundaries for these earlier grouped items are not reconstructed here.

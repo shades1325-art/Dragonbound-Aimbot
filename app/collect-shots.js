@@ -1,0 +1,39 @@
+(() => {
+ const previous=globalThis.__reaDragonCollector;if(previous?.interval)clearInterval(previous.interval);
+ const collector={samples:previous?.samples??[],calibration:previous?.calibration??[],seen:previous?.seen??new WeakSet(),interval:null,startedAt:Date.now(),lastError:null,session:previous?.session??Date.now(),ground:previous?.ground??globalThis.__reaDragonRenderer?.ground};
+ collector.scan=()=>{try{
+  const d=globalThis.__reaDragonRenderer,p=d?.myPlayer;if(!p)return;
+  if(collector.ground!==d.ground){collector.ground=d.ground;collector.session=Date.now();collector.calibration=[];}
+  for(const object of d.camera_container.children){
+   if(!object.shot?.s||!object.zp||collector.seen.has(object))continue;
+   collector.seen.add(object);const a=object.shot,s=a.start??Object.fromEntries(['x','y','ang','power','ax','ay','t'].map((k,i)=>[k,a.s[i]]));
+   const players=d.smoke_players.filter(p=>p.is_alive);
+   const shooter=players.toSorted((a,b)=>Math.hypot(a.x-s.x,a.y-s.y)-Math.hypot(b.x-s.x,b.y-s.y))[0];
+   const muzzle=p.aim?.[a.shot_type];const phi=muzzle?((p.look===0?180-muzzle.ang:muzzle.ang)-p.body)*Math.PI/180:0;const angle=(p.look===0?180-p.ang:p.ang)-p.body;
+   const originError=muzzle?Math.hypot(s.x-(p.x+Math.cos(phi)*muzzle.size),s.y-(p.y-Math.sin(phi)*muzzle.size)):Infinity;
+   const angleError=Math.abs(((s.ang-angle+540)%360)-180);
+   const expectedBullet=globalThis.__reaDragonBallistics?__reaDragonBallistics.bulletOf(p,a.shot_type):p.mobile_data?.bullets?.[a.shot_type];
+   const isLocal=originError<3&&angleError<1.1&&(globalThis.__reaDragonBallistics?.bulletsOf?.(p,a.shot_type)??[expectedBullet]).includes(a.img);
+   const owner=isLocal?p:shooter;
+   const checkTimes=[...new Set([0,100,500,1000,...(a.jumps??[]).flatMap(j=>[Math.max(0,j[0]-.1),j[0],j[0]+.1,j[0]+100])])];
+   const record={time:Date.now(),session:collector.session,mobile:owner?.mobile,shooter:owner?.n,isLocal,shotType:a.shot_type,bullet:a.img,start:{...s},uiPower:Number.parseFloat(document.getElementById('powerBar')?.style.width),wind:{power:d.wind_power,angle:d.wind_angle},weathers:d.weathers.map(w=>({weather_type:w.weather_type,x:w.x,size:w.size})),player:owner?{n:owner.n,x:owner.x,y:owner.y,ang:owner.ang,body:owner.body,look:owner.look,selected_shot:owner.selected_shot,aim:owner.aim}:null,waveType:a.wave??null,change:a.change?{...a.change}:null,special:{wave:!!a.wave,path:!!a.path,orbit:!!a.orbit,jumps:a.jumps??null},impact:a.hole??null,flightMs:a.time,physicsChecks:[0,100,500,1000].map(time=>({time,pos:object.zp.GetPosAtTime(time)})),jumpChecks:checkTimes.map(time=>({time,pos:object.zp.GetPosAtTime(time,a.jumps)}))};
+   if([52,53,54].includes(a.img)){try{const raw=JSON.stringify(a);if(raw.length<=160000)record.grubDescriptor=JSON.parse(raw);}catch{}}
+   if([59,60,61,62,63].includes(a.img)){try{const raw=JSON.stringify(a);if(raw.length<=160000)record.raonDescriptor=JSON.parse(raw);}catch{}const mineOwner=globalThis.__reaDragonGame?.mine_owners?.[a.removeMine];if(mineOwner!==undefined){record.raonMineOwner=mineOwner;if(mineOwner===p.n){record.isLocal=true;record.mobile=19;record.shooter=p.n;}}}
+   if([34,35,36,37].includes(a.img)){try{const raw=JSON.stringify(a);if(raw.length<=160000)record.nakDescriptor=JSON.parse(raw);}catch{}}
+   if(a.img===36&&(s.t??0)>0){const parent=collector.samples.findLast(r=>r.session===collector.session&&r.isLocal&&r.mobile===11&&r.bullet===35&&(r.start.t??0)===0&&r.flightMs===(s.t??0)&&Math.abs(record.time-r.time)<250);if(parent){record.mobile=11;record.shooter=parent.shooter;record.player=parent.player;record.uiPower=parent.uiPower;record.isLocal=true;record.nakParent={time:parent.time,start:parent.start,flightMs:parent.flightMs};record.aimSnapshot=parent.aimSnapshot;}}
+   record.damage=Array.isArray(a.d)?a.d.map(v=>({n:v.n,hp:v.hp,shield:v.shield})):[];if(isLocal){const h=globalThis.__reaDragonAim?.applyHistory??[];record.aimSnapshot=h.findLast(v=>v.session===collector.session&&v.mobile===owner?.mobile&&v.shot===a.shot_type&&v.time<=record.time&&record.time-v.time<10000)??null;}
+   if([14,19].includes(p.mobile)&&isLocal&&a.wave)record.waveChecks=[0,100,400,1000,2000,2200,2400,2600,3000].map(time=>({time,pos:object.GetPosAtTime(time)}));
+   if(a.path){record.path=a.path.slice();record.pathDuration=a.time-(object.GetChangeDur?object.GetChangeDur():0);record.pathChecks=checkTimes.filter(time=>time>=0&&time<=record.pathDuration).map(time=>({time,pos:object.GetPosAtTime(time)}));}
+   if((isLocal||p.mobile===19&&record.raonMineOwner===p.n)&&(a.path||a.jumps?.length||[14,19].includes(p.mobile)&&a.wave)&&!a.orbit){record.replayPoints=[];const duration=record.pathDuration??a.time??5000,step=Math.max(15,duration/700);for(let time=0;time<=duration;time+=step)record.replayPoints.push({...object.GetPosAtTime(time),t:time/1000});record.replayPoints.push({...object.GetPosAtTime(duration),t:duration/1000});}
+   collector.samples.push(record);if(collector.samples.length>250)collector.samples.shift();
+   if(record.isLocal&&(record.start.t||0)===0){collector.calibration.push(record);if(collector.calibration.length>1000)collector.calibration.shift();}
+  }
+ }catch(error){collector.lastError=String(error)}};
+ const ballistics=globalThis.__reaDragonBallistics,d=globalThis.__reaDragonRenderer,p=d?.myPlayer;
+ if(ballistics&&p){for(const sample of collector.samples){if(sample.mobile!==p.mobile||sample.shotType<0||sample.shotType>2||!sample.player||sample.player.n!==p.n)continue;const muzzle=sample.player.aim?.[sample.shotType];if(!muzzle)continue;const phi=((sample.player.look===0?180-muzzle.ang:muzzle.ang)-sample.player.body)*Math.PI/180;const originError=Math.hypot(sample.start.x-(sample.player.x+Math.cos(phi)*muzzle.size),sample.start.y-(sample.player.y-Math.sin(phi)*muzzle.size));const angle=(sample.player.look===0?180-sample.player.ang:sample.player.ang)-sample.player.body;const angleError=Math.abs(((sample.start.ang-angle+540)%360)-180);if(originError<3&&angleError<1.1&&(ballistics.bulletsOf?.(p,sample.shotType)??[ballistics.bulletOf(p,sample.shotType)]).includes(sample.bullet))sample.isLocal=true;}}
+ if(ballistics?.positionAtPath){for(const sample of collector.samples){if(!sample.isLocal||!sample.path?.length||sample.replayPoints)continue;sample.replayPoints=[];const duration=sample.pathDuration,step=Math.max(15,duration/700);for(let time=0;time<=duration;time+=step)sample.replayPoints.push({...ballistics.positionAtPath(time,sample.path,duration),t:time/1000});}}
+ const retained=new Set(collector.calibration);for(const sample of collector.samples){if(sample.session===collector.session&&sample.isLocal&&(sample.start.t||0)===0&&!retained.has(sample)){collector.calibration.push(sample);retained.add(sample);}}
+ collector.interval=setInterval(collector.scan,20);collector.scan();
+ Object.defineProperty(globalThis,'__reaDragonCollector',{value:collector,configurable:true});
+ return {running:true,samples:collector.samples.length,player:globalThis.__reaDragonRenderer?.myPlayer?.mobile};
+})()

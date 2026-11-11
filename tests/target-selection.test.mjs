@@ -1,0 +1,4 @@
+import assert from 'node:assert/strict';import {selectTarget} from '../app/runtime-recovery-policy.mjs';
+const profile={targetId:'profile',type:'page',url:'https://dragonbound.net/user/name'},game={targetId:'game',type:'page',url:'https://dragonbound.net/#server-8'},room={targetId:'room',type:'page',url:'https://dragonbound.net/r/bP9DH9v'};
+assert.equal(selectTarget([profile,game],'profile'),game);assert.equal(selectTarget([profile],'profile'),null);assert.equal(selectTarget([profile,room],'profile'),room);assert.equal(selectTarget([game,room],null),null);assert.equal(selectTarget([game,room],'room'),room);assert.equal(selectTarget([{...profile,url:'https://dragonbound.net/shop'}],null),null);assert.equal(selectTarget([{...game,url:'https://other.example/'}],null),null);
+console.log(JSON.stringify({passed:true,checks:7,realBrowserActions:0}));

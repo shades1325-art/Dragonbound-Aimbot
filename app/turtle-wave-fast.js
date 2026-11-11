@@ -1,0 +1,15 @@
+// Exact prepared native wave3/4 math plus conservative target preflight.
+(()=>{
+ const old=globalThis.__reaTurtleWave;if(!old)throw Error('Install native Turtle wave helper first');const preparedCache=new Map();
+ function prepare(start,jumps=[]){const key=JSON.stringify([start.x,start.y,start.ang,start.power,start.vx,start.vy,start.ax,start.ay,jumps]);if(preparedCache.has(key))return preparedCache.get(key);const masks=new Map(),rad=start.ang*Math.PI/180,base={at:0,x:start.x,y:start.y,vx:start.vx??Math.cos(rad)*start.power,vy:start.vy??-Math.sin(rad)*start.power,ax:start.ax,ay:start.ay,z:0},segments=[base,...jumps.map(j=>({at:j[0],x:j[1],y:j[2],vx:j[3],vy:j[4],ax:j[5]??start.ax,ay:j[6]??start.ay,z:j[7]??0}))];
+  function at(ms){let lo=0,hi=segments.length-1;while(lo<hi){const mid=Math.ceil((lo+hi)/2);if(segments[mid].at<=ms)lo=mid;else hi=mid-1;}const s=segments[lo],t=(ms-s.at)/1000,x=s.x+s.vx*t+s.ax*t*t/2,y=s.y+s.vy*t+s.ay*t*t/2,hx=s.vx+s.ax*(t-.0025),hy=s.vy+s.ay*(t-.0025),length=Math.hypot(hx,hy),dx=length?hx/length:1,dy=length?hy/length:0,a=old.amplitudeAt(ms),ox=a*dy,oy=-a*dx;return[{x:x+ox,y:y+oy,z:s.z},{x:x-ox,y:y-oy,z:s.z}];}
+  function calculatePotential(target,duration){if(!target)return 3;const kernel=globalThis.__reaDragonBallistics,left=target.x-47.1,right=target.x+47.1,top=target.y-61.1,bottom=target.y+28.1;let mask=0;
+   for(let i=0;i<segments.length;i++){const s=segments[i],t0=s.at/1000,t1=Math.min(duration,(segments[i+1]?.at??duration*1000)/1000);if(t1<t0)continue;const end=t1-t0,times=[0,end,...[left,right].flatMap(x=>kernel.roots(s.ax/2,s.vx,s.x-x)),...[top,bottom].flatMap(y=>kernel.roots(s.ay/2,s.vy,s.y-y))].filter(t=>t>=0&&t<=end).sort((a,b)=>a-b);
+    for(let j=0;j<times.length;j++){const a=times[j],b=times[j+1]??a,mid=(a+b)/2,cx=s.x+s.vx*mid+s.ax*mid*mid/2,cy=s.y+s.vy*mid+s.ay*mid*mid/2;if(cx<left-.1||cx>right+.1||cy<top-.1||cy>bottom+.1)continue;const step=Math.min(.001,Math.max(.00025,1/(Math.hypot(s.vx,s.vy)+Math.hypot(s.ax,s.ay)*duration+1)));for(let t=a;t<=b+step/2;t+=step){const global=Math.min(b,t)+t0;if(global<.025)continue;const pair=at(global*1000);for(let k=0;k<2;k++)if(Math.abs(pair[k].x-target.x)<=22.2&&pair[k].y>=target.y-36.2&&pair[k].y<=target.y+3.2)mask|=1<<k;if(mask===3)return 3;}}
+   }return mask;
+  }
+  function potential(target,duration){if(!target)return 3;const k=JSON.stringify([target.x,target.y,duration]);if(masks.has(k))return masks.get(k);const value=calculatePotential(target,duration);masks.set(k,value);if(masks.size>8)masks.delete(masks.keys().next().value);return value;}
+  const prepared={at,potential};preparedCache.set(key,prepared);if(preparedCache.size>512)preparedCache.delete(preparedCache.keys().next().value);return prepared;
+ }
+ Object.defineProperty(globalThis,'__reaTurtleWave',{value:Object.freeze({...old,version:2,prepare}),configurable:true});return{installed:true,version:2};
+})()

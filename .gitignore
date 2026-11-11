@@ -1,0 +1,23 @@
+# Dependencies and prepared Windows runtime
+**/node_modules/
+/runtime/
+/dist/
+
+# Local browser bindings, process state, preferences and shot recordings
+/app/data/
+/app/inspect-game-args.json
+/app/bridge-endpoint.json
+/app/game-binding.json
+/app/runtime-*.json
+/app/oneclick-error.json
+*-test-result.json
+*.log
+.env
+.env.*
+
+# Editor and operating-system files
+.vscode/
+.idea/
+Thumbs.db
+Desktop.ini
+.DS_Store

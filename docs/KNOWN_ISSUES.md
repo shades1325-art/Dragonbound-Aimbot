@@ -1,0 +1,44 @@
+# Known issues and fix roadmap
+
+This list separates implemented estimates from mechanics that still need evidence. Priority describes the next development work, not a claim that every item fails in every match.
+
+## P1 — Physics and shot correctness
+
+| Area | What needs fixing or validation | Completion criterion |
+| --- | --- | --- |
+| Wind across mobiles | Several initial models extrapolate unmeasured wind using an inferred factor; universal coverage is not established | Compare predicted versus received launch acceleration and impact over multiple wind directions/strengths and independent matches |
+| Grub bounce direction | Current terrain normals are estimated; historical native normal accuracy is unverified | Capture terrain at contact and compare incoming/outgoing vectors on flat ground, slopes, walls and damaged terrain |
+| Grub left-facing S2 | The empirical fan was observed in right-facing bursts only | Capture matched left/right bursts and establish angle-offset mirroring/order before treating it as confirmed |
+| Grub SS | First-contact aim is implemented; rolling, repeated damage and a general SS lifetime remain unresolved | Record a complete SS after contact and identify transitions and damage timing independently of tornado jumps |
+| Turtle SS | Carrier timing and six-fragment forecasts have limited native coverage | Compare release time and all fragment positions/contacts across facing, wind and weather; preserve direct-impact behavior |
+| Raon mines/robot | Only airborne flight and placement are predicted | Capture complete landing-to-movement-to-detonation sequences with ownership and target information; do not substitute animation range for blast radius |
+| Nak S2 | Continuous terrain entry/exit is modeled from limited observed transitions | Compare underground exits on slopes, thin ground and irregular destructible terrain with a captured terrain snapshot |
+| Mirror/tornado combinations | Elevated/repeated mirrors and combined weather are incompletely validated | Match recorded transitions and final contacts for isolated and combined effects, including multi-projectile shots |
+| Boomer hook/backshot | Reference formulas have unavailable regions and differ from a fully simulated learned path | Expand measured trajectory coverage and compare return paths, height differences and terrain clearance without fabricating paths for formula-only advice |
+
+## P2 — Reliability and performance
+
+| Area | Remaining work | Completion criterion |
+| --- | --- | --- |
+| Client binding | The loader depends on internal client handlers and closure structure | Detect unsupported client layouts clearly and test a maintained set of compatible layouts |
+| Difficult weather searches | Searches are bounded, but expensive scenes can still take longer | Profile worst-case multi-projectile terrain/weather scenes and compare p95/max search times and frame pacing |
+| Chrome profiles | The loader reads the standard Chrome user-data directory | Add an explicit profile/endpoint option without changing game-origin restrictions |
+| Multiple game tabs | Ambiguous targets wait rather than guessing | Add a user-facing tab picker and persist only the chosen local target |
+| Loader stop | Stop ends tracking/recovery; the page overlay stays until reload | Add an explicit teardown path and verify removal of owned elements/listeners without disturbing game state |
+| State writes | Status/preferences are written as JSON files; readers may observe partial writes during concurrency | Use atomic replacement and verify concurrent status reads and restart behavior |
+| Regression portability | Only a subset of the local investigation tests is portable in this repository | Extract anonymized fixtures and migrate remaining model/weather tests without raw player records or machine paths |
+
+## P3 — Documentation and usability
+
+- Translate the in-game panel and diagnostic reasons into English, or add a language selector. The Windows launcher and repository guides are already English.
+- Explain uncertainty and unsupported conditions consistently across every mobile.
+- Add repeatable screenshots/video demonstrations for each shot mode, clearly identifying estimates.
+- Add a visible calibration summary showing current-match samples versus prior/extrapolated data.
+
+## Validation boundaries
+
+The local V27 development pass tested Grub's three-shot model selection, four S2 branches, self-hit rejection, movement/wind updates, visibility controls and empty terrain. Thirty received bounce transitions supported the outgoing-speed estimate. Terrain-normal direction and fuse tracing also used synthetic geometry, which does not prove native complex-terrain hit accuracy.
+
+The three-second S2 lifetime was observed in four projectiles from one burst. It is implemented for S2 only and still needs independent-burst validation. It is not an established SS fuse rule.
+
+The portable repository tests currently cover runtime recovery policy, game-tab selection and movement/aim refresh behavior. Passing them does not establish special-shot or all-wind accuracy.
