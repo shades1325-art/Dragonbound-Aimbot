@@ -4,6 +4,8 @@ This list separates implemented estimates from mechanics that still need evidenc
 
 ## P1 — Physics and shot correctness
 
+V28 fixes path/countdown timing disagreement, weather-segment child association, linear zero-gravity crossings and stale firing/calibration-power handling. These implementation fixes do not establish universal special-weather or impact accuracy.
+
 | Area | What needs fixing or validation | Completion criterion |
 | --- | --- | --- |
 | Wind across mobiles | Several initial models extrapolate unmeasured wind using an inferred factor; universal coverage is not established | Compare predicted versus received launch acceleration and impact over multiple wind directions/strengths and independent matches |
@@ -41,4 +43,4 @@ The local V27 development pass tested Grub's three-shot model selection, four S2
 
 The three-second S2 lifetime was observed in four projectiles from one burst. It is implemented for S2 only and still needs independent-burst validation. It is not an established SS fuse rule.
 
-The portable repository tests currently cover runtime recovery policy, game-tab selection and movement/aim refresh behavior. Passing them does not establish special-shot or all-wind accuracy.
+The portable repository tests cover runtime recovery, game-tab selection, movement/aim refresh, firing transactions, SS timing/search and 42 anonymized native fragment descriptors. They include synthetic weather cases; no native weather-transformed split has been validated. Passing them does not establish all-wind accuracy.

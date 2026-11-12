@@ -17,7 +17,7 @@ A generated portable package already contains the prepared runtime and dependenc
 3. Choose automatic search in the arc-mode drop-down. Use high arc when you want a higher legal path, or fixed angle to solve power for an angle you enter.
 4. Review the status and predicted path. Yellow or estimated states indicate uncertainty; reference-formula advice may not include a simulated path.
 5. Enable the automatic-adjustment checkbox below the apply/shoot buttons if you want the suggested angle and power applied when the turn is ready. Disable it for manual testing.
-6. Use F8 or the apply button to refresh and apply immediately. Review the result before using the game controls or the overlay's shoot button to fire.
+6. Use F8 or the apply button to refresh and apply immediately. Review the result before using the game controls or the overlay's shoot button to fire. Mouse 5, the forward side button, also refreshes and shoots the ready aim.
 
 Positions, vehicle slope, shot type, target and wind changes trigger recalculation. Automatic adjustment pauses briefly while the mobile is moving, then resumes after movement settles. If no valid path is found, change the angle mode, clearance, position or target and review the stated reason.
 
@@ -40,9 +40,10 @@ The in-game panel currently uses Vietnamese labels. This table describes the con
 | Long arc checkbox | Allow an extrapolated long arc under the supported zero-wind conditions |
 | Apply button / F8 | Refresh and apply the suggested angle and power |
 | Shoot button | Explicitly fire using the current ready aim |
+| Mouse 5 | Refresh and fire the ready aim; browser-forward navigation is consumed while the overlay is active |
 | Automatic-adjustment checkbox | Apply suggestions when the turn is ready |
 
-The power-bar marker shows the suggested force on the game's 0–400 scale. It marks a firing power, not a probability of hitting.
+The power-bar marker shows the suggested force on the game's 0–400 scale. It marks a firing power, not a probability of hitting. Aim shooting commits one integer power after refreshing. If the native player, turn, shot or applied angle does not match, it stops rather than sending a stale solution; wait for the ready state and press again.
 
 ## Vehicle-specific behavior
 
@@ -59,7 +60,7 @@ S2 draws two wave trajectories and reports estimated contacts. SS offers two mod
 - **Airborne split:** seek a split near the apex and forecast six fragments and their landing spread.
 - **Direct impact:** seek terrain contact near the target's feet before the carrier splits.
 
-Six recorded complete splits began opening at 2.10 seconds and released fragments at 2.60 seconds. Those observations inform the model; they are not a universal timing guarantee across all conditions. The timing display remains visible when the main panel is hidden.
+Seven recorded complete splits began opening at 2.10 seconds and released fragments at 2.60 seconds. Those observations inform the model; they are not a universal timing guarantee across all conditions. The timing display follows the chosen path/model and remains visible when the main panel is hidden. The search refines integer power near promising candidates and expands its power window when the initial seeds cannot place all six fragments near the target.
 
 ### Nak
 

@@ -1,6 +1,6 @@
 # DragonBound Aimbot
 
-Trajectory prediction, angle and power assistance, and a Windows one-click launcher for DragonBound. The current application baseline is **V27**, including Grub support.
+Trajectory prediction, angle and power assistance, and a Windows one-click launcher for DragonBound. The current application is **V28**, with refined Turtle SS search and Mouse 5 shooting.
 
 ## Introduction
 
@@ -44,7 +44,7 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\prepare-runtim
 
 Ordinary aim assistance does not continuously fire. Optional Boomer Auto Learn can start games and fire test shots only after you explicitly start it in a verified bot-only room you own.
 
-**F9** toggles the control panel. **F8** refreshes and applies the suggested angle/power. The trajectory visibility control is separate from panel visibility. Running the launcher again restores the panel.
+**Mouse 5** (the forward side button) refreshes, applies and fires the current ready aim. **F9** toggles the control panel. **F8** refreshes and applies the suggested angle/power. The trajectory visibility control is separate from panel visibility. Running the launcher again restores the panel.
 
 The existing in-game panel contains Vietnamese labels; all repository documentation is in English. See the ordered controls in [Usage](docs/USAGE.md).
 

@@ -1,13 +1,13 @@
 {
   "name": "dragonbound-oneclick",
-  "version": "27.0.0",
+  "version": "28.0.0",
   "private": true,
   "type": "module",
   "description": "DragonBound trajectory overlay and Windows one-click launcher",
   "engines": { "node": ">=24" },
   "scripts": {
     "check": "node ../scripts/check.mjs",
-    "test": "node --test ../tests/runtime-recovery.test.mjs ../tests/target-selection.test.mjs ../tests/moving-overlay.test.mjs"
+    "test": "node --test ../tests/runtime-recovery.test.mjs ../tests/target-selection.test.mjs ../tests/moving-overlay.test.mjs ../tests/turtle-ss.test.mjs ../tests/aim-fire.test.mjs"
   },
   "dependencies": { "ws": "8.21.0" }
 }

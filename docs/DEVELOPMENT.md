@@ -39,7 +39,7 @@ npm.cmd --prefix app test
 
 The syntax check parses application JavaScript and example JSON without connecting to a browser. Tests use synthetic players, terrain and DOM stubs or pure target-selection policies. They never fire a real shot or start a live game.
 
-The repository imports the tested V27 application baseline. More extensive historical native-shot and special-weather tests remain in local investigation material and are not represented as shipped portable tests. See [Known issues](KNOWN_ISSUES.md) before extending accuracy claims.
+The repository started from V27 and now includes V28 SS/firing improvements. Seven minimal anonymized split fixtures test 42 native fragment descriptors. Synthetic tests cover weather timing, angle/shot/turn guards, Mouse 5 duplication and committed-power calibration. More extensive historical native-shot and special-weather tests remain in local investigation material. See [Known issues](KNOWN_ISSUES.md) before extending accuracy claims.
 
 ## Build a portable ZIP
 

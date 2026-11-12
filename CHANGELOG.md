@@ -2,6 +2,31 @@
 
 This log uses the overlay's historical version numbers. The initial Git import contains the V27 baseline; earlier entries summarize local development milestones rather than Git tags or independently published releases.
 
+## V28 — Turtle SS refinement and Mouse 5 — 2026-11-12
+
+### Added
+
+- Mouse 5 shooting through the same refreshed transaction as the overlay's shoot button.
+- Suppression of browser-forward navigation and duplicate pointer/mouse events for the hotkey; remove listeners when the overlay is replaced.
+- Integer-power refinement, a wider fallback search and angle-diverse bounded terrain checks for Turtle SS.
+- Estimated fragment impact tilt alongside landing spread, and complete SS timing in apply history.
+- Portable tests with seven anonymized native split events covering 42 fragments, plus firing/collector regression tests.
+
+### Fixed
+
+- Make the SS countdown honor the path/model's opening and release times.
+- Associate fragments using acceleration at opening after weather transitions, rather than launch acceleration.
+- Preserve descending linear crossings in zero-gravity weather segments and include jumps/velocity bias in fallback markers.
+- Resolve the current player after aim refresh; require matching native player, turn and shot selection before firing.
+- Accept the current player's bound network facade rather than requiring identity with the internal network object; capture side-button events at window level before page handlers.
+- Reject invalid power and angle changes that the game clamps away from the solved angle.
+- Store the committed integer power and use the matched shot snapshot for received calibration, instead of a later mutable power bar.
+- Replace the obsolete message claiming that split-fragment positions are not predicted.
+
+### Validation boundary
+
+The seven complete native splits support the existing empirical fragment law, not universal weather accuracy. Automated firing tests use simulated events and a stubbed sender. The user also confirmed Mouse 5 firing after the facade/capture correction, with received-shot calibration retaining committed powers. Development tools do not fire live shots.
+
 ## Repository preparation — 2026-11-11
 
 ### Added
