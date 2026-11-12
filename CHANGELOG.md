@@ -2,6 +2,20 @@
 
 This log uses the overlay's historical version numbers. The initial Git import contains the V27 baseline; earlier entries summarize local development milestones rather than Git tags or independently published releases.
 
+## V30 — Turtle Timebomb reference integration — 2026-11-13
+
+### Added
+
+- An explicit Turtle SS Timebomb mode: invert the current wind/elevation model at opening time, refine integer power and verify six fragment terrain paths.
+- Opening distance, landing spread, predicted nearby fragment count and an opening-inside-tornado indicator in the panel/status and committed aim history.
+- Extra low-power weather seeds within the existing bounded full-trace budget, plus a link to Creedo's Turtle guide.
+- English reference notes explaining how the requested Gunbound timebomb, wind, elevation, tornado and training ideas relate to DragonBound.
+
+### Validation boundary
+
+- Archived Gunbound screen/bar tables, damage values and tornado exit quirks are not applied as DragonBound constants. Current match calibration and the observed split law remain authoritative.
+- Timebomb paths and tornado split behavior are provisional; nearby terrain contacts do not establish body collisions or damage. No extra automatic firing is enabled.
+
 ## V29 — Turtle S2 contacts and mirror preference — 2026-11-12
 
 ### Added

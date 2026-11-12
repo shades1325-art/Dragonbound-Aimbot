@@ -1,6 +1,6 @@
 {
   "name": "dragonbound-oneclick",
-  "version": "29.0.0",
+  "version": "30.0.0",
   "private": true,
   "type": "module",
   "description": "DragonBound trajectory overlay and Windows one-click launcher",

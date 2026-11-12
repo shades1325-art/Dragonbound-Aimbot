@@ -4,7 +4,7 @@
   if(player.mobile===2&&player.selected_shot>1)return{ready:false,reason:'Autoaim Aduka hiện hỗ trợ S1 và S2'};
   if(!target)return{ready:false,reason:'Chọn mục tiêu trong danh sách'};
   if(!model?.valid&&(player.mobile!==15||typeof modelForPlayer!=='function'))return{ready:false,reason:model?.reason||'Bắn một phát thường để hiệu chuẩn Autoaim'};
-  const skyMode=model?.turtleSS&&(options.turtleSSMode??model.turtleSSMode??'skybomb')==='skybomb',mirror=globalThis.__reaMirror;
+  const ssMode=options.turtleSSMode??model?.turtleSSMode??'skybomb',skyMode=model?.turtleSS&&['skybomb','timebomb'].includes(ssMode),mirror=globalThis.__reaMirror;
   if(model?.turtle&&!skyMode&&options.preferMirror!==false&&!options.mirrorSearchPass&&renderer.weathers?.some(w=>w.weather_type===7)&&mirror?.prefer){
    const normal=find(api,renderer,model,player,target,modelForPlayer,{...options,mirrorSearchPass:true});
    if(!normal?.ready)return normal;
@@ -15,7 +15,7 @@
   if(model?.grub)return globalThis.__reaGrubShot?.find(api,renderer,model,player,target,options)??{ready:false,reason:'Chưa nạp bộ tính Grub'};
   if(model?.raon)return globalThis.__reaRaonShot?.find(api,renderer,model,player,target,options)??{ready:false,reason:'Chưa nạp bộ tính Raon'};
   if(model?.nakAirOnly)return globalThis.__reaNakShot?.find(api,renderer,model,player,target,options)??{ready:false,reason:'Chưa nạp bộ tính Nak S2 chui đất'};
-  if(model?.turtleSS&&(options.turtleSSMode??model.turtleSSMode??'skybomb')==='skybomb')return globalThis.__reaTurtleSky?.find(api,renderer,model,player,target,options)??{ready:false,reason:'Chưa nạp bộ tính Turtle SS bung trên cao'};
+  if(skyMode)return globalThis.__reaTurtleSky?.find(api,renderer,model,player,target,{...options,turtleSSMode:ssMode})??{ready:false,reason:'Chưa nạp bộ tính Turtle SS tách mảnh'};
   const min=player.minang??0,max=player.maxang??180,centers=model?.turtleSS||model?.turtlePair?[{x:target.x,y:target.y+1},{x:target.x-6,y:target.y+1},{x:target.x+6,y:target.y+1}]:[{x:target.x,y:target.y-14},{x:target.x-8,y:target.y-12},{x:target.x+8,y:target.y-12},{x:target.x,y:target.y-26}],candidates=[],fixed=options.mode==='fixed'&&Number.isFinite(options.fixedDisplay);
   const looks=fixed&&[0,1].includes(options.fixedLook)?[options.fixedLook]:[player.look,1-player.look];
   for(const look of looks){
@@ -45,5 +45,5 @@
   return{ready:false,reason:model?.turtleSS?'SS nổ trực tiếp: chưa có điểm chạm đất sát mục tiêu trước khi bung':blockedWeather?'Đường bắn qua lốc/gương: chưa đủ dữ liệu':!candidates.length&&player.mobile===15&&!model?.valid?model?.reason||'Boomer: chưa có mô hình cho gió / loại đạn này':fixed?'Góc đang giữ chưa vượt được địa hình; đổi góc hoặc chọn Tự động':'Chưa có góc và lực vượt địa hình đến mục tiêu'};
  }
  function apply(player,result){if(!result?.ready)return{applied:false,reason:result?.reason||'Chưa có nghiệm'};if(![2,11,14,15,17,19].includes(player.mobile)&&!['Ice','Turtle','Nak','Raon','Raon Launcher','Grub'].includes(player.mobile_data?.name)||result.mobile!==undefined&&result.mobile!==player.mobile)return{applied:false,reason:'Góc/lực không thuộc xe hiện tại'};if(!Number.isFinite(result.power)||result.power<1||result.power>400||!Number.isFinite(result.angle)||![0,1].includes(result.look))return{applied:false,reason:'Góc/lực không hợp lệ'};player.Look(result.look);player.ChangeAngleTo(result.angle,true);if(player.look!==result.look||Math.abs(player.ang-result.angle)>.001)return{applied:false,reason:'Game chưa áp dụng đúng góc ngắm; chưa bắn'};return{applied:true,angle:player.ang,look:player.look,power:Math.round(result.power)};}
- const api={version:16,find,apply};for(const name of ['__reaAdukaAutoAim','__reaDragonAutoAim'])Object.defineProperty(globalThis,name,{value:api,configurable:true});return{installed:true,version:16,mobiles:['Aduka','Boomer','Ice','Turtle','Nak','Raon','Grub'],fullLegalAngleSearch:true,terrainModes:true,fractionalAngleLock:true};
+ const api={version:17,find,apply};for(const name of ['__reaAdukaAutoAim','__reaDragonAutoAim'])Object.defineProperty(globalThis,name,{value:api,configurable:true});return{installed:true,version:17,mobiles:['Aduka','Boomer','Ice','Turtle','Nak','Raon','Grub'],fullLegalAngleSearch:true,terrainModes:true,fractionalAngleLock:true};
 })()

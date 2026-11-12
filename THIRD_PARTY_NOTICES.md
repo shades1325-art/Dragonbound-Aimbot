@@ -18,3 +18,9 @@ The implemented reference methods were informed by these guides:
 - [Boomer formula discussion](https://tinhban.forum-viet.net/t11-cong-thuc-ban-boomer)
 
 Reference-derived advice has different validation limits from a measured DragonBound trajectory. The repository does not bundle those pages or the game client's captured scripts.
+
+## Turtle SS reference concepts
+
+Creedo's historical Turtle guide informed the Timebomb search objective and reference notes: [introduction (21)](https://creedo.gbgl-hq.com/turtleguide/turtleguide21.php), [base method (22)](https://creedo.gbgl-hq.com/turtleguide/turtleguide22.php), [windcharts (23)](https://creedo.gbgl-hq.com/turtleguide/turtleguide23.php), [examples (24)](https://creedo.gbgl-hq.com/turtleguide/turtleguide24.php), [tornado SS (25)](https://creedo.gbgl-hq.com/turtleguide/turtleguide25.php), and [other tips (26)](https://creedo.gbgl-hq.com/turtleguide/turtleguide26.php).
+
+The implementation uses its own model-based search and observed DragonBound fragment law. It does not redistribute the pages, images or tables. See [Turtle reference notes](docs/TURTLE_REFERENCE.md) for attribution and validation boundaries.

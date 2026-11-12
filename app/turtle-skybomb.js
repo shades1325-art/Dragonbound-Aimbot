@@ -1,4 +1,4 @@
-// Empirical Turtle SS Skybomb search. Installing exposes math only.
+// Empirical Turtle SS Skybomb / Timebomb search. Installing exposes math only.
 // Six-fragment law matches seven observed splits, including both directions
 // near apex. Weather transitions remain provisional. No native controls,
 // timers or network calls are used.
@@ -40,27 +40,30 @@
  }
  function failed(reason,extra={}){return{ready:false,provisional:true,turtleSkybomb:true,predictedHit:false,reason,...extra};}
  function find(api,d,m,p,target,options={}){
-  if((p?.mobile!==14&&p?.mobile_data?.name!=='Turtle')||p?.selected_shot!==2)return failed('Skybomb chỉ dùng cho Turtle SS');
-  if(!m?.valid||![m.ratio,m.ax,m.ay].every(finite)||m.ratio<=0||m.ay<=0)return failed('Skybomb: chưa có mô hình vận tốc và gia tốc Turtle phù hợp');
-  if(!target||![target.x,target.y,p.x,p.y,p.body].every(finite))return failed('Skybomb: chờ vị trí xe và mục tiêu');
-  if(typeof api?.launch!=='function'||typeof api?.trajectory!=='function'||typeof api?.terrain!=='function')return failed('Skybomb: chưa có bộ tính đường đạn');
+  const timebomb=options.turtleSSMode==='timebomb',label=timebomb?'Timebomb':'Skybomb';
+  if((p?.mobile!==14&&p?.mobile_data?.name!=='Turtle')||p?.selected_shot!==2)return failed(label+' chỉ dùng cho Turtle SS');
+  if(!m?.valid||![m.ratio,m.ax,m.ay].every(finite)||m.ratio<=0||m.ay<=0)return failed(label+': chưa có mô hình vận tốc và gia tốc Turtle phù hợp');
+  if(!target||![target.x,target.y,p.x,p.y,p.body].every(finite))return failed(label+': chờ vị trí xe và mục tiêu');
+  if(typeof api?.launch!=='function'||typeof api?.trajectory!=='function'||typeof api?.terrain!=='function')return failed(label+': chưa có bộ tính đường đạn');
   const openingMs=Math.max(100,Math.min(10000,options.openingMs??m.ssOpeningMs??2100)),releaseMs=Math.max(openingMs,options.releaseMs??m.ssReleaseMs??openingMs+500),T=openingMs/1000,release=releaseMs/1000;
-  const radius=Math.max(8,Math.min(60,options.nearRadius??28)),verticalTolerance=Math.max(5,Math.min(60,options.verticalTolerance??25)),apexTolerance=Math.max(10,Math.min(600,options.apexToleranceMs??300)),minNear=Math.max(3,Math.min(6,options.minNearCount??3)),maxCandidates=Math.max(1,Math.min(16,Math.floor(options.maxCandidates??12))),childHorizon=Math.max(.1,Math.min(5,options.childHorizon??5));
+  const radius=Math.max(8,Math.min(60,options.nearRadius??28)),verticalTolerance=Math.max(5,Math.min(60,options.verticalTolerance??25)),apexTolerance=Math.max(10,Math.min(600,options.apexToleranceMs??300)),minNear=Math.max(3,Math.min(6,options.minNearCount??3)),maxCandidates=Math.max(1,Math.min(16,Math.floor(options.maxCandidates??12))),childHorizon=Math.max(.1,Math.min(5,options.childHorizon??(timebomb?1.2:5))),openingRadius=Math.max(30,Math.min(240,options.openingRadius??160));
+  const openingAllowed=(opening,apexErrorMs)=>timebomb?opening.y<target.y-4&&Math.hypot(opening.x-target.x,opening.y-target.y)<=openingRadius:apexErrorMs<=apexTolerance&&opening.y<=target.y-36;
   const now=typeof options.now==='function'?options.now():typeof performance!=='undefined'?performance.now():Date.now(),fixed=options.mode==='fixed'&&finite(options.fixedDisplay),weather=(d.weathers??[]).map(w=>[w.weather_type,w.x,w.size]),preferMirror=options.preferMirror!==false&&weather.some(w=>w[0]===7)&&!!globalThis.__reaMirror?.prefer;
-  const key=JSON.stringify([identity(api),identity(d.ground),d.ground?.revision,d.ground?.version,p.x,p.y,p.body,p.look,p.ang,p.minang,p.maxang,p.aim?.[2],target.n,target.x,target.y,m.ratio,m.speedQuantization,m.ax,m.ay,m.velocityBiasX,m.velocityBiasY,m.dx,m.dy,m.sampleCount,d.wind_power,d.wind_angle,weather,openingMs,releaseMs,radius,verticalTolerance,apexTolerance,minNear,maxCandidates,childHorizon,options.mode,options.fixedDisplay,options.fixedLook,options.clearance,preferMirror]);
+  const key=JSON.stringify([identity(api),identity(d.ground),d.ground?.revision,d.ground?.version,p.x,p.y,p.body,p.look,p.ang,p.minang,p.maxang,p.aim?.[2],target.n,target.x,target.y,m.ratio,m.speedQuantization,m.ax,m.ay,m.velocityBiasX,m.velocityBiasY,m.dx,m.dy,m.sampleCount,d.wind_power,d.wind_angle,weather,openingMs,releaseMs,radius,verticalTolerance,apexTolerance,minNear,maxCandidates,childHorizon,options.mode,options.fixedDisplay,options.fixedLook,options.clearance,preferMirror,timebomb,openingRadius]);
   const saved=cache.get(key);if(saved&&now>=saved.time&&now-saved.time<400){counters.cacheHits++;return{...saved.value,cacheHit:true};}
   counters.searches++;
   const save=value=>{cache.set(key,{time:now,value});while(cache.size>16)cache.delete(cache.keys().next().value);return value;};
-  const min=finite(p.minang)?p.minang:0,max=finite(p.maxang)?p.maxang:90,looks=fixed&&[0,1].includes(options.fixedLook)?[options.fixedLook]:[...new Set([p.look,1-p.look].filter(v=>v===0||v===1))],candidates=[],seen=new Set(),windows=[],hasWeather=weather.some(w=>[7,8].includes(w[0]));
+  const min=finite(p.minang)?p.minang:0,max=finite(p.maxang)?p.maxang:90,looks=fixed&&[0,1].includes(options.fixedLook)?[options.fixedLook]:[...new Set([p.look,1-p.look].filter(v=>v===0||v===1))],candidates=[],seen=new Set(),windows=[],hasWeather=weather.some(w=>[7,8].includes(w[0])),hasTornado=weather.some(w=>w[0]===8);
   function evaluate(look,angle,origin,power,refined=false){
    if(power<1||power>400)return;const id=look+':'+angle+':'+power;if(seen.has(id))return;seen.add(id);counters.sampledPowers++;if(refined)counters.refinedPowers++;
    const start=startOf(m,origin,power),parentWeather=hasWeather?globalThis.__reaTornadoMethod?.predict(start,d.weathers,T):null,candidateJumps=parentWeather?.jumps??[],opening=stateAt(start,openingMs,candidateJumps),apexErrorMs=Math.abs(opening.vy/(opening.ay||m.ay))*1000;
-   if(apexErrorMs>apexTolerance||opening.y>target.y-36)return;
+   if(!openingAllowed(opening,apexErrorMs))return;
    const starts=fragmentStarts(start,openingMs,releaseMs,candidateJumps);
    if(!hasWeather){let potential=0;for(let i=0;i<starts.length;i++){if(canReach(starts[i],target,radius,verticalTolerance,childHorizon))potential++;if(potential+starts.length-i-1<minNear)return;}}
    const childWeather=starts.map(s=>hasWeather?globalThis.__reaTornadoMethod?.predict(s,d.weathers,childHorizon):null),landings=starts.map((s,i)=>planeLanding(s,target.y,childHorizon,childWeather[i]?.jumps??[]));if(landings.some(v=>!v))return;
    const xs=landings.map(v=>v.x),center=xs.reduce((a,b)=>a+b,0)/xs.length,span=Math.max(...xs)-Math.min(...xs),near=xs.filter(x=>Math.abs(x-target.x)<=radius).length;
-   const score=(6-near)*10000+Math.abs(center-target.x)*2+span*.2+apexErrorMs*.04+Math.abs(angle-p.ang)*.02+(look===p.look?0:.1);
+   const openingDistance=Math.hypot(opening.x-target.x,opening.y-target.y),timingScore=timebomb?openingDistance*.3:apexErrorMs*.04;
+   const score=(6-near)*10000+Math.abs(center-target.x)*2+span*.2+timingScore+Math.abs(angle-p.ang)*.02+(look===p.look?0:.1);
    const mirrorHint=!!parentWeather?.reflections?.length||childWeather.some((w,i)=>w?.reflections?.some(r=>r.timeMs<=landings[i].t*1000));
    candidates.push({look,angle,power,origin,start,opening,apexErrorMs,score,analyticNear:near,analyticSpan:span,mirrorHint});
   }
@@ -69,8 +72,11 @@
    for(const angle of [...new Set(angles)]){
     const origin=api.launch({...p,look,ang:angle});if(!origin||![origin.x,origin.y,origin.angle].every(finite))continue;origin.x+=m.dx||0;origin.y+=m.dy||0;
     const sine=Math.sin(origin.angle*DEG);if(sine<=.01)continue;
-    const ideal=(m.ay*T+(m.velocityBiasY||0))/(m.ratio*sine),base=Math.max(1,Math.min(400,Math.round(ideal))),range=(m.ay*apexTolerance/1000+1)/(m.ratio*sine),low=Math.max(1,Math.ceil(ideal-range)),high=Math.min(400,Math.floor(ideal+range));
+    // Invert the current wind/elevation model at opening time. Historic
+    // Gunbound bars and windchart constants are not DragonBound calibration.
+    const cosine=Math.cos(origin.angle*DEG),ideal=timebomb?((target.x-origin.x-(m.velocityBiasX||0)*T-m.ax*T*T/2)*cosine-(target.y-45-origin.y-(m.velocityBiasY||0)*T-m.ay*T*T/2)*sine)/(m.ratio*T):(m.ay*T+(m.velocityBiasY||0))/(m.ratio*sine),base=Math.max(1,Math.min(400,Math.round(ideal))),range=timebomb?openingRadius/(m.ratio*T):(m.ay*apexTolerance/1000+1)/(m.ratio*sine),low=Math.max(1,Math.ceil(ideal-range)),high=Math.min(400,Math.floor(ideal+range));
     for(const delta of [-24,-16,-8,-4,-2,-1,0,1,2,4,8,16,24])evaluate(look,angle,origin,base+delta);
+    if(hasTornado)for(let power=1;power<=36;power+=3)evaluate(look,angle,origin,power);
     windows.push({look,angle,origin,low,high});
    }
   }
@@ -80,7 +86,7 @@
   candidates.sort(order);const refinementAngles=new Set(),refine=[];for(const candidate of candidates){const group=candidate.look+':'+candidate.angle;if(refinementAngles.has(group))continue;refinementAngles.add(group);refine.push(candidate);if(refine.length>=8)break;}
   for(const candidate of refine)for(let delta=-3;delta<=3;delta++)if(delta)evaluate(candidate.look,candidate.angle,candidate.origin,candidate.power+delta,true);
   counters.analyticCandidates+=candidates.length;
-  if(!candidates.length)return save(failed(fixed?'Skybomb: góc đang giữ chưa đủ để bung gần đỉnh; đổi góc hoặc chọn Tự động':'Skybomb: giới hạn góc/lực hiện tại chưa tạo được điểm bung gần đỉnh trên mục tiêu'));
+  if(!candidates.length)return save(failed(timebomb?'Timebomb: chưa có điểm bung sát mục tiêu; thử đổi góc hoặc chọn Skybomb':fixed?'Skybomb: góc đang giữ chưa đủ để bung gần đỉnh; đổi góc hoặc chọn Tự động':'Skybomb: giới hạn góc/lực hiện tại chưa tạo được điểm bung gần đỉnh trên mục tiêu'));
   candidates.sort(order);let best=null,bestNear=0,bestApex=null,tried=0;
   const parentModel={...m,turtleSS:false,turtlePair:false,turtleSkybomb:false,maxTime:T},shortlist=[],selected=new Set(),groups=new Set();
   if(preferMirror)for(const candidate of candidates.filter(c=>c.mirrorHint)){const group=candidate.look+':'+candidate.angle;if(groups.has(group))continue;groups.add(group);shortlist.push(candidate);selected.add(candidate);if(shortlist.length>=Math.ceil(maxCandidates/2))break;}
@@ -92,7 +98,7 @@
    const parent=api.trajectory(d,parentModel,candidate.origin,candidate.power,target,T,{clearance:Math.max(0,Math.min(20,options.clearance??0)),searchOnly:false,ignorePlayerContact:false});
    if(parent?.hit||!parent?.points?.length)continue;
    const jumps=parent.jumps??[],opening=stateAt(candidate.start,openingMs,jumps),apexErrorMs=Math.abs(opening.vy/(opening.ay||m.ay))*1000;
-   if(apexErrorMs>apexTolerance||opening.y>target.y-36||api.terrain(d,opening.x,opening.y))continue;
+   if(!openingAllowed(opening,apexErrorMs)||api.terrain(d,opening.x,opening.y))continue;
    const starts=fragmentStarts(candidate.start,openingMs,releaseMs,jumps),children=[],near=[];
    for(const start of starts){
     const childModel={...m,ratio:1,speedQuantization:'floor',velocityBiasX:0,velocityBiasY:0,dx:0,dy:0,ax:start.ax,ay:start.ay,turtleSS:false,turtlePair:false,turtleSkybomb:false,pathBased:false,provisional:true,maxTime:childHorizon};
@@ -104,14 +110,17 @@
    const contacts=children.filter(c=>c.hit?.type==='ground'&&!c.hit.clearanceOnly),xs=contacts.map(c=>c.hit.x),span=xs.length?Math.max(...xs)-Math.min(...xs):Infinity,center=xs.reduce((a,b)=>a+b,0)/(xs.length||1),nearest=near.toSorted((a,b)=>Math.hypot(a.hit.x-target.x,a.hit.y-target.y)-Math.hypot(b.hit.x-target.x,b.hit.y-target.y))[0];
    const parentPoints=[...parent.points.filter(q=>q.t<T),{x:opening.x,y:opening.y,t:T},{x:opening.x,y:opening.y,t:release}],parentBranch={...parent,points:parentPoints,hit:null,skybombCarrier:true},path={points:parentPoints,hit:nearest.hit,branches:[parentBranch,...children],childPaths:children,skybomb:true,opening:{x:opening.x,y:opening.y,t:T},releaseTime:release,horizon:release+childHorizon,weatherHandled:!!parent.weatherHandled||children.some(c=>c.weatherHandled)};
    const tilts=near.map(child=>{const v=stateAt(child.start,child.localHit.t*1000,child.jumps??[]);return Math.atan2(Math.abs(v.vx),Math.max(0,v.vy))/DEG;}),impactTiltDegrees=tilts.reduce((a,b)=>a+b,0)/tilts.length;
-   const score=(6-count)*10000+Math.abs(center-target.x)*2+span*.2+apexErrorMs*.04+impactTiltDegrees*.3;
+   const openingDistance=Math.hypot(opening.x-target.x,opening.y-target.y),openingInsideTornado=weather.some(w=>w[0]===8&&Math.abs(opening.x-w[1])<=w[2]/4);
+   const score=(6-count)*10000+Math.abs(center-target.x)*2+span*.2+(timebomb?openingDistance*.3:apexErrorMs*.04+impactTiltDegrees*.3);
    const found={ready:true,provisional:true,predictedHit:false,turtleSkybomb:true,predictedNearCount:count,apexErrorMs,landingSpan:span,landingCenter:center,impactTiltDegrees,openingMs,releaseMs,origin:candidate.origin,angle:candidate.angle,displayAngle:candidate.origin.angle>90?180-candidate.origin.angle:candidate.origin.angle,look:candidate.look,power:candidate.power,target:{n:target.n,x:target.x,y:target.y},targetNumber:target.n,mobile:14,model:{...m,turtleSkybomb:true,provisional:true,mirrorEstimate:!!parent.mirrorReflections?.length||children.some(c=>c.mirrorReflections?.length),randomWeatherIgnored:weather.some(w=>w[0]===6)},path,t:nearest.hit.t,score,candidateLaw:'empirical-vx-half-scalar-round',search:{analyticCandidates:candidates.length,fullCandidates:tried,maxCandidates}};
+   Object.assign(found,{turtleTimebomb:timebomb,ssMode:timebomb?'timebomb':'skybomb',openingDistance,openingInsideTornado});
+   found.model.tornadoEstimate=(parent.tornadoTransitions??parent.weatherTransitions??0)>0||children.some(c=>c.tornadoTransitions>0)||openingInsideTornado;
    if(preferMirror)best=globalThis.__reaMirror.prefer(found,best,target,{nearRadius:radius,verticalTolerance});else if(!best||score<best.score)best=found;
-   if(count===6&&apexErrorMs<=80&&span<=radius*2&&Math.abs(center-target.x)<=radius*.35&&(!preferMirror||best?.mirrorBenefit?.hasMirror))break;
+   if(count===6&&(timebomb?openingDistance<=60:apexErrorMs<=80)&&span<=radius*2&&Math.abs(center-target.x)<=radius*.35&&(!preferMirror||best?.mirrorBenefit?.hasMirror))break;
   }
-  return save(best??failed('Skybomb: chưa có đường bung gần đỉnh với ít nhất '+minNear+' mảnh chạm đất sát mục tiêu',{bestNearCount:bestNear,bestApexErrorMs:bestApex,search:{analyticCandidates:candidates.length,fullCandidates:tried,maxCandidates}}));
+  return save(best??failed(label+': chưa có đường bung với ít nhất '+minNear+' mảnh chạm đất sát mục tiêu',{bestNearCount:bestNear,bestApexErrorMs:bestApex,search:{analyticCandidates:candidates.length,fullCandidates:tried,maxCandidates}}));
  }
  const fragmentLaw=Object.freeze({provisional:true,observedEvents:7,horizontalScale:.5,scalarQuantization:'round',angleQuantization:'round',offsets:Object.freeze([...offsets])});
- Object.defineProperty(globalThis,'__reaTurtleSky',{value:Object.freeze({version:5,fragmentLaw,fragmentStarts,planeLanding,find,clearCache(){cache.clear();},stats(){return{...counters,cacheEntries:cache.size};}}),configurable:true});
- return{installed:true,version:5};
+ Object.defineProperty(globalThis,'__reaTurtleSky',{value:Object.freeze({version:6,fragmentLaw,fragmentStarts,planeLanding,find,clearCache(){cache.clear();},stats(){return{...counters,cacheEntries:cache.size};}}),configurable:true});
+ return{installed:true,version:6};
 })()

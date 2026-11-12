@@ -33,7 +33,7 @@ The in-game panel currently uses Vietnamese labels. This table describes the con
 | Target drop-down | Select the player to aim toward |
 | Arc-mode drop-down | Automatic, high arc or fixed displayed angle |
 | Boomer method | Select a physics model or reference formula; visible for Boomer |
-| Turtle SS mode | Choose airborne split or direct impact; visible for Turtle SS |
+| Turtle SS mode | Choose Skybomb, Timebomb or direct impact; visible for Turtle SS |
 | Mirror preference | Prefer a reflected Turtle path when predicted contact counts are preserved; shown during mirror weather |
 | Auto Learn area | Start/stop optional Boomer bot-room sampling |
 | Angle input and +/- buttons | Lock and adjust the displayed angle by one degree |
@@ -56,9 +56,12 @@ Reference advice comes from older Gunbound guides and has explicit unavailable r
 
 ### Turtle
 
-S2 draws both wave trajectories through the possible body-contact region toward predicted terrain contact. The orange dashed continuation is uncertain because the native body collider is not recovered. Counts describe predicted terrain landings near the feet, not confirmed damage. Current-match wind samples take priority; sparse directional coverage uses an explicitly inferred fallback rather than a global fitted law. SS offers two modes:
+For SS, choose **Timebomb** to search for a split close to the target, **Skybomb** to search for a split near the apex above the target, or **direct impact** to land the carrier before it opens. Timebomb solves angle and power together using the current wind acceleration, target elevation and observed opening/release times, then traces all six fragments. It does not require a fresh pair of shots merely because you change SS mode. An inferred wind model remains uncertain. When a chosen mode has no solution, try the other split mode or move to obtain a usable angle; the solver does not silently change your selection. See the [reference notes](TURTLE_REFERENCE.md).
 
-- **Airborne split:** seek a split near the apex and forecast six fragments and their landing spread.
+S2 draws both wave trajectories through the possible body-contact region toward predicted terrain contact. The orange dashed continuation is uncertain because the native body collider is not recovered. Counts describe predicted terrain landings near the feet, not confirmed damage. Current-match wind samples take priority; sparse directional coverage uses an explicitly inferred fallback rather than a global fitted law. SS offers three modes:
+
+- **Skybomb:** seek a split near the apex and forecast six fragments and their landing spread.
+- **Timebomb:** seek a split near the target and short fragment flights, adjusting angle and power together.
 - **Direct impact:** seek terrain contact near the target's feet before the carrier splits.
 
 Seven recorded complete splits began opening at 2.10 seconds and released fragments at 2.60 seconds. Those observations inform the model; they are not a universal timing guarantee across all conditions. The timing display follows the chosen path/model and remains visible when the main panel is hidden. The search refines integer power near promising candidates and expands its power window when the initial seeds cannot place all six fragments near the target.
