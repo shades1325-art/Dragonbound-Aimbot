@@ -34,6 +34,7 @@ The in-game panel currently uses Vietnamese labels. This table describes the con
 | Arc-mode drop-down | Automatic, high arc or fixed displayed angle |
 | Boomer method | Select a physics model or reference formula; visible for Boomer |
 | Turtle SS mode | Choose airborne split or direct impact; visible for Turtle SS |
+| Mirror preference | Prefer a reflected Turtle path when predicted contact counts are preserved; shown during mirror weather |
 | Auto Learn area | Start/stop optional Boomer bot-room sampling |
 | Angle input and +/- buttons | Lock and adjust the displayed angle by one degree |
 | Terrain clearance | Set the search margin from 0 to 20 pixels |
@@ -55,7 +56,7 @@ Reference advice comes from older Gunbound guides and has explicit unavailable r
 
 ### Turtle
 
-S2 draws two wave trajectories and reports estimated contacts. SS offers two modes:
+S2 draws both wave trajectories through the possible body-contact region toward predicted terrain contact. The orange dashed continuation is uncertain because the native body collider is not recovered. Counts describe predicted terrain landings near the feet, not confirmed damage. Current-match wind samples take priority; sparse directional coverage uses an explicitly inferred fallback rather than a global fitted law. SS offers two modes:
 
 - **Airborne split:** seek a split near the apex and forecast six fragments and their landing spread.
 - **Direct impact:** seek terrain contact near the target's feet before the carrier splits.
@@ -77,6 +78,8 @@ S2 draws four projectiles with distinct angle/speed offsets and favors more targ
 ### Weather
 
 Mirror and tornado paths are experimental. Reflection markers and dashed segments distinguish special-weather transitions. Unknown random weather keeps the ordinary flight calculation until the game reveals the effect; the overlay does not predict an unrevealed random result.
+
+Turtle's mirror preference is enabled by default. It keeps the predicted contact/proximity count first, then prefers a viable reflected path. Turn it off with the checkbox during mirror weather if you want ordinary ranking. For split SS, carrier reflections and target-bound fragment reflections are reported separately. This is a geometric preference, not a numerical damage calculation; Sun and Mirror are distinct and bonus inheritance is unverified.
 
 ## Optional Boomer Auto Learn
 

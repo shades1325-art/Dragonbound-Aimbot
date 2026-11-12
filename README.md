@@ -1,6 +1,6 @@
 # DragonBound Aimbot
 
-Trajectory prediction, angle and power assistance, and a Windows one-click launcher for DragonBound. The current application is **V28**, with refined Turtle SS search and Mouse 5 shooting.
+Trajectory prediction, angle and power assistance, and a Windows one-click launcher for DragonBound. The current application is **V29**, with Turtle mirror priority, revised S2 contact forecasts and Mouse 5 shooting.
 
 ## Introduction
 
@@ -17,7 +17,7 @@ The launcher finds the game tab automatically, follows new matches and restores 
 | Aduka | Angle/power search, initial model, movement and wind updates | Unmeasured wind conditions remain estimates |
 | Boomer | Learned flight models; Hook400, Backshot250, Fix50/70, Shotgun, Lob and high-angle reference methods | Some formula regions and complex weather have incomplete coverage |
 | ICE | S1/S2/SS recognition, shared and shot-specific calibration, initial estimates | Cross-wind accuracy requires more validation |
-| Turtle | S1; paired S2 waves; direct-impact and airborne-split SS modes with timing display | SS fragment placement and combined weather remain experimental |
+| Turtle | S1; paired S2 terrain forecasts; direct-impact and airborne-split SS; optional mirror priority | Exact body collision, SS placement and combined weather remain experimental |
 | Nak | S1/SS flight and S2 terrain entry, underground segment and exit search | Complex underground geometry is estimated |
 | Raon Launcher | Three S1 streams; two S2 landing points; SS robot landing point | Mine/robot movement and later detonation are not predicted |
 | Grub | S1/S2/SS, four separate S2 projectiles, estimated terrain bounces | Left-facing spread, complex bounce normals and SS repeated damage remain unverified |

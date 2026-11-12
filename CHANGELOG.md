@@ -2,6 +2,28 @@
 
 This log uses the overlay's historical version numbers. The initial Git import contains the V27 baseline; earlier entries summarize local development milestones rather than Git tags or independently published releases.
 
+## V29 — Turtle S2 contacts and mirror preference — 2026-11-12
+
+### Added
+
+- Turtle mirror preference for S1/S2 and split SS, preserving predicted contact/proximity counts before preferring a reflected path.
+- Separate carrier reflection and target-bound fragment reflection counts; do not assign an unverified damage multiplier or stacking/inheritance rule.
+- A preference checkbox shown when Turtle has active mirror weather.
+- Minimal shot-time target terrain snapshots for local S2 diagnostics, excluded from Git and portable packages with other shot records.
+- Portable regressions for sparse wind coverage, S2 terrain tracing and mirror ranking.
+
+### Fixed
+
+- Stop treating the generic target rectangle as a confirmed S2 collision. Continue the paired forecast to terrain and show the uncertain body-contact region with a dashed continuation.
+- Aim paired S2 terrain contacts near the target's feet and refine their terrain crossings.
+- Prevent a wind law fitted to two nearby directions from being reused as a precise global extrapolation. Exact measured winds still take priority.
+- Preserve Mouse 5's bound-facade firing fix and duplicate-event handling.
+
+### Remaining limits
+
+- Received S2 wave positions match the wave formula, but exact native body collision is not recovered. Some actual impacts occur before the terrain forecast; splash damage and terminal-grid timing cannot identify a universal hitbox.
+- Mirror and Sun are distinct effects. No client-side numerical Sun/Mirror damage multiplier or carrier-to-fragment bonus inheritance has been established.
+
 ## V28 — Turtle SS refinement and Mouse 5 — 2026-11-12
 
 ### Added

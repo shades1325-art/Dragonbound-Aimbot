@@ -6,6 +6,8 @@ This list separates implemented estimates from mechanics that still need evidenc
 
 V28 fixes path/countdown timing disagreement, weather-segment child association, linear zero-gravity crossings and stale firing/calibration-power handling. These implementation fixes do not establish universal special-weather or impact accuracy.
 
+V29 removes the false S2 rectangle stop, adds conservative wind coverage and mirror preference. It does not replace the unknown server collider with another guessed universal shape. Body contact may happen before the drawn terrain endpoint; that continuation remains dashed. Native hole coordinates can also differ from the sampled terminal-grid center.
+
 | Area | What needs fixing or validation | Completion criterion |
 | --- | --- | --- |
 | Wind across mobiles | Several initial models extrapolate unmeasured wind using an inferred factor; universal coverage is not established | Compare predicted versus received launch acceleration and impact over multiple wind directions/strengths and independent matches |
@@ -13,6 +15,7 @@ V28 fixes path/countdown timing disagreement, weather-segment child association,
 | Grub left-facing S2 | The empirical fan was observed in right-facing bursts only | Capture matched left/right bursts and establish angle-offset mirroring/order before treating it as confirmed |
 | Grub SS | First-contact aim is implemented; rolling, repeated damage and a general SS lifetime remain unresolved | Record a complete SS after contact and identify transitions and damage timing independently of tornado jumps |
 | Turtle SS | Carrier timing and six-fragment forecasts have limited native coverage | Compare release time and all fragment positions/contacts across facing, wind and weather; preserve direct-impact behavior |
+| Turtle S2 contacts | The wave law matches native samples, but terrain/body collision and splash are distinct | Use shot-time terrain/target snapshots and held-out contact/miss pairs before adopting a native body collider |
 | Raon mines/robot | Only airborne flight and placement are predicted | Capture complete landing-to-movement-to-detonation sequences with ownership and target information; do not substitute animation range for blast radius |
 | Nak S2 | Continuous terrain entry/exit is modeled from limited observed transitions | Compare underground exits on slopes, thin ground and irregular destructible terrain with a captured terrain snapshot |
 | Mirror/tornado combinations | Elevated/repeated mirrors and combined weather are incompletely validated | Match recorded transitions and final contacts for isolated and combined effects, including multi-projectile shots |
@@ -43,4 +46,4 @@ The local V27 development pass tested Grub's three-shot model selection, four S2
 
 The three-second S2 lifetime was observed in four projectiles from one burst. It is implemented for S2 only and still needs independent-burst validation. It is not an established SS fuse rule.
 
-The portable repository tests cover runtime recovery, game-tab selection, movement/aim refresh, firing transactions, SS timing/search and 42 anonymized native fragment descriptors. They include synthetic weather cases; no native weather-transformed split has been validated. Passing them does not establish all-wind accuracy.
+The portable repository tests cover recovery, movement/aim refresh, firing transactions, wind coverage, mirror ranking, S2 ground tracing, 36 anonymized S2 wave positions and 42 native SS fragment descriptors. They include synthetic weather cases; no native weather-transformed SS split has been validated. Passing them does not establish all-wind or exact native body-collision accuracy.

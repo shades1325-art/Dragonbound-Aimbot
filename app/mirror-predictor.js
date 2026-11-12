@@ -46,5 +46,26 @@
   const result={jumps,reflections,provisional:true,stepMs:constants.stepMs,randomIgnored,compoundEstimate:reflections.length>0&&tornadoEvents>0,reentryEstimate,eventLimit,horizonMs:horizon,heightUnverified:reflections.some(r=>r.heightUnverified),startingInsideEstimate:reflections.some(r=>r.startingInside),source:'empirical-mirror-transitions',tornadoEvents};
   cache.set(key,result);if(cache.size>128)cache.delete(cache.keys().next().value);return result;
  }
- Object.defineProperty(globalThis,'__reaMirror',{value:Object.freeze({version:1,constants,predict,clearCache(){cache.clear();},stats(){return{cacheEntries:cache.size,computes,cacheHits:hits};}}),configurable:true});return{installed:true,version:1};
+ // Geometry-based preference only. No server damage multiplier or inheritance is assumed.
+ function benefit(result,target,options={}){
+  const path=result?.path??{},sky=!!path.skybomb,radius=options.nearRadius??28,vertical=options.verticalTolerance??25;
+  const reached=(refs,t)=>finite(t)?(refs??[]).filter(r=>r.timeMs<=t*1000+1e-6).length:0;
+  const near=(b,r=radius)=>b.hit?.type==='ground'&&!b.hit.clearanceOnly&&target&&Math.abs(b.hit.x-target.x)<=r&&Math.abs(b.hit.y-target.y)<=vertical;
+  let carrierReflections=0,reflectedContacts=0,totalReflections=0;
+  if(sky){const carrier=path.branches?.find(b=>b.skybombCarrier);carrierReflections=reached(carrier?.mirrorReflections,path.opening?.t);totalReflections=carrierReflections;for(const b of path.childPaths??[]){const count=reached(b.mirrorReflections,b.localHit?.t??(finite(b.hit?.t)?b.hit.t-path.releaseTime:undefined));totalReflections+=count;if(count&&near(b))reflectedContacts++;}}
+  else if(path.branches?.length){const refs=path.mirrorReflections??[];totalReflections=refs.length;for(const b of path.branches){const hit=b.hit?.type==='target'||path.pairGround&&near(b,22),count=reached(b.mirrorReflections??refs,b.hit?.t);if(count&&hit)reflectedContacts++;}}
+  else{totalReflections=reached(path.mirrorReflections,path.hit?.t);if(totalReflections&&result?.ready)reflectedContacts=1;}
+  const contacts=result?.predictedNearCount??path.pairHits??path.grubHits??path.raonHits??(result?.ready?1:0);
+  return{contacts,hasMirror:reflectedContacts>0||sky&&carrierReflections>0,reflectedContacts,carrierReflections,totalReflections,damageMultiplierKnown:false,carrierBonusInheritanceKnown:false};
+ }
+ function prefer(candidate,current,target,options={}){
+  if(!candidate?.ready)return current;if(!current?.ready)return{...candidate,mirrorPriority:true,mirrorBenefit:benefit(candidate,target,options)};
+  const a=benefit(candidate,target,options),b=benefit(current,target,options);let chosen=current;
+  if(a.contacts!==b.contacts)chosen=a.contacts>b.contacts?candidate:current;
+  else if(a.hasMirror!==b.hasMirror)chosen=a.hasMirror?candidate:current;
+  else if(a.reflectedContacts!==b.reflectedContacts)chosen=a.reflectedContacts>b.reflectedContacts?candidate:current;
+  else if(finite(candidate.score)&&finite(current.score)&&candidate.score<current.score)chosen=candidate;
+  return{...chosen,mirrorPriority:true,mirrorBenefit:benefit(chosen,target,options)};
+ }
+ Object.defineProperty(globalThis,'__reaMirror',{value:Object.freeze({version:2,constants,predict,benefit,prefer,clearCache(){cache.clear();},stats(){return{cacheEntries:cache.size,computes,cacheHits:hits};}}),configurable:true});return{installed:true,version:2};
 })()

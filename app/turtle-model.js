@@ -1,6 +1,25 @@
 (()=>{
  const rad=a=>a*Math.PI/180,finite=Number.isFinite,median=values=>{const a=values.toSorted((x,y)=>x-y);return(a[(a.length-1)>>1]+a[a.length>>1])/2;},isTurtle=p=>p?.mobile===14||p?.mobile_data?.name==='Turtle';
  const vector=w=>({x:Math.floor(w.power*Math.cos(rad(w.angle))),y:Math.floor(-w.power*Math.sin(rad(w.angle)))});
+ // Reusing an affine wind law is interpolation, not evidence for other directions.
+ // Distinct, non-collinear wind coverage prevents a two-shot fit from appearing
+ // precise far outside the observed wind region.
+ function windCoverage(values,current){
+  const points=[...new Map(values.map(v=>[v.x+':'+v.y,{x:v.x,y:v.y}])).values()];
+  const info={distinctVectors:points.length,supported:false,reason:'need-three-wind-vectors'};
+  if(points.length<3)return info;
+  const mx=points.reduce((n,v)=>n+v.x,0)/points.length,my=points.reduce((n,v)=>n+v.y,0)/points.length;
+  let xx=0,yy=0,xy=0;for(const p of points){xx+=(p.x-mx)**2;yy+=(p.y-my)**2;xy+=(p.x-mx)*(p.y-my);}xx/=points.length;yy/=points.length;xy/=points.length;
+  const delta=Math.hypot(xx-yy,2*xy),major=(xx+yy+delta)/2,minor=Math.max(0,(xx+yy-delta)/2);
+  info.minorVariance=minor;info.spreadRatio=major>0?minor/major:0;
+  // These are conservative coverage thresholds, not recovered game constants.
+  if(minor<1||info.spreadRatio<.05)return{...info,reason:'narrow-direction-coverage'};
+  const cross=(a,b,c)=>(b.x-a.x)*(c.y-a.y)-(b.y-a.y)*(c.x-a.x),sorted=points.toSorted((a,b)=>a.x-b.x||a.y-b.y),lower=[],upper=[];
+  for(const p of sorted){while(lower.length>1&&cross(lower.at(-2),lower.at(-1),p)<=0)lower.pop();lower.push(p);}
+  for(const p of sorted.toReversed()){while(upper.length>1&&cross(upper.at(-2),upper.at(-1),p)<=0)upper.pop();upper.push(p);}
+  const hull=[...lower.slice(0,-1),...upper.slice(0,-1)],inside=hull.every((p,i)=>cross(p,hull[(i+1)%hull.length],current)>=-1e-8);
+  return{...info,supported:inside,reason:inside?'interpolated-coverage':'outside-observed-wind-region'};
+ }
  function annotate(model,p){const pair=p.selected_shot===1,ss=p.selected_shot===2,c=globalThis.__reaDragonCollector,ssMode=ss?(globalThis.__reaDragonAim?.settings?.turtleSSMode??'skybomb'):null,timing=ss?globalThis.__reaTurtleSS?.fuse([...(c?.calibration??[]),...(c?.samples??[])],c?.session):null;return{...model,turtle:true,turtlePair:pair,turtleSS:ss,turtleSSMode:ssMode,ssOpeningMs:timing?.openingMs,ssReleaseMs:timing?.releaseMs,ssTimingEstimated:!!timing,provisional:model.provisional||pair||ss,waveMappingEstimated:pair,maxTime:ss&&timing?timing.openingMs/1000:6.5};}
  function fit(samples,d,p,session){
   if(!isTurtle(p)||![0,1,2].includes(p.selected_shot)||!finite(d.wind_power)||d.wind_power<0||d.wind_power>26||!finite(d.wind_angle))return null;
@@ -17,15 +36,15 @@
   const speed=force=>quantization==='round'?Math.round(force*ratio):quantization==='floor'?Math.floor(force*ratio):force*ratio,velocityError=Math.max(...rows.map(r=>Math.abs(speed(r.uiPower)-r.start.power)));
   if(!(ratio>0)||velocityError>1.2)return seed(d,p);
   const values=rows.map(r=>({...vector(r.wind),ax:r.start.ax,ay:r.start.ay})),mean=k=>values.reduce((n,v)=>n+v[k],0)/values.length,mx=mean('x'),my=mean('y'),ma=mean('ax'),mg=mean('ay'),den=values.reduce((n,v)=>n+(v.x-mx)**2+(v.y-my)**2,0);
-  let law=null;
-  if(den>1){const factor=values.reduce((n,v)=>n+(v.x-mx)*(v.ax-ma)+(v.y-my)*(v.ay-mg),0)/den,biasX=ma-factor*mx,gravity=mg-factor*my,residual=Math.max(...values.map(v=>Math.hypot(v.ax-biasX-factor*v.x,v.ay-gravity-factor*v.y)));if(factor>0&&factor<20&&residual<=2)law={factor,biasX,gravity,residual};}
   const current=vector({power:d.wind_power,angle:d.wind_angle}),exact=rows.filter(r=>r.wind.power===d.wind_power&&(d.wind_power===0||Math.abs(((r.wind.angle-d.wind_angle+540)%360)-180)<.01));
+  const coverage=windCoverage(values,current);let law=null;
+  if(coverage.supported&&den>1){const factor=values.reduce((n,v)=>n+(v.x-mx)*(v.ax-ma)+(v.y-my)*(v.ay-mg),0)/den,biasX=ma-factor*mx,gravity=mg-factor*my,residual=Math.max(...values.map(v=>Math.hypot(v.ax-biasX-factor*v.x,v.ay-gravity-factor*v.y)));if(factor>0&&factor<20&&residual<=2)law={factor,biasX,gravity,residual};}
   let ax,ay,windInferred=false;
   if(exact.length){ax=median(exact.map(r=>r.start.ax));ay=median(exact.map(r=>r.start.ay));if(exact.some(r=>Math.hypot(r.start.ax-ax,r.start.ay-ay)>2))return seed(d,p);}
   else if(law){ax=law.biasX+law.factor*current.x;ay=law.gravity+law.factor*current.y;}
   else{const anchor=rows.toSorted((a,b)=>b.time-a.time)[0],v=vector(anchor.wind),factor=globalThis.__reaTurtlePrior?.data?.windFactor??4;ax=anchor.start.ax+factor*(current.x-v.x);ay=anchor.start.ay+factor*(current.y-v.y);windInferred=true;}
   const specific=rows.filter(r=>r.shotType===p.selected_shot),estimated=!exact.length||specific.length===0||rows.length<2;
-  return annotate({valid:true,ratio,speedQuantization:quantization,ax,ay,dx:0,dy:0,sampleCount:rows.length,exactWindSamples:exact.length,minPower:Math.min(...rows.map(r=>r.uiPower)),maxPower:Math.max(...rows.map(r=>r.uiPower)),velocityError,windModel:law,windFallback:!exact.length,windInferred,provisional:estimated,positionAllowance:(power,t)=>3+(velocityError+1)*t+(windInferred?12:!exact.length?3:1)*t*t,reason:null},p);
+  return annotate({valid:true,ratio,speedQuantization:quantization,ax,ay,dx:0,dy:0,sampleCount:rows.length,exactWindSamples:exact.length,minPower:Math.min(...rows.map(r=>r.uiPower)),maxPower:Math.max(...rows.map(r=>r.uiPower)),velocityError,windModel:law,windCoverage:{...coverage,mode:exact.length?'exact':law?'interpolated':'anchor-estimate'},windFallback:!exact.length,windInferred,provisional:estimated,positionAllowance:(power,t)=>3+(velocityError+1)*t+(windInferred?12:!exact.length?3:1)*t*t,reason:null},p);
  }
  function seed(d,p){
   const q=globalThis.__reaTurtlePrior?.data;if(!isTurtle(p)||!q||!finite(d.wind_power)||d.wind_power<0||d.wind_power>26||!finite(d.wind_angle))return null;
