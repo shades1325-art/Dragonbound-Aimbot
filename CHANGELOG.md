@@ -2,6 +2,15 @@
 
 This log uses the overlay's historical version numbers. The initial Git import contains the V27 baseline; earlier entries summarize local development milestones rather than Git tags or independently published releases.
 
+## V35 — Earlier Turtle SS aim and partial estimates — 2026-11-13
+
+- Add a quick pass around analytically promising angles and powers before the broad search. The default twelve full-candidate checks are shared between quick/refinement passes and both styles.
+- Display the first terrain-verified suggestion immediately and retain it while searching for a better cluster. A ready result can be applied or fired during refinement; pending results without a ready path remain unavailable.
+- Remove the hard three-tight-fragment acceptance gate. One verified terrain contact inside the wider proximity window can produce a clearly marked weak estimate; tight count still dominates ranking, and no contact is fabricated.
+- Recheck sampled terrain before reusing an in-progress best path. Preserve explicit styles, fixed angles, mirror preference and low-confidence diagnostics.
+
+These changes improve availability and time to the first suggestion; a sparse cluster is not a claim of accurate multi-hit damage. Completely blocked or unreachable targets can still have no solution.
+
 ## V34 — Turtle SS selection and placement confidence — 2026-11-13
 
 ### Changed

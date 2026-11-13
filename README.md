@@ -1,6 +1,6 @@
 # DragonBound Aimbot
 
-Trajectory prediction, angle and power assistance, and a Windows one-click launcher for DragonBound. The current application is **V34**, with automatic Turtle SS style comparison, tighter fragment-cluster ranking and visible model uncertainty, alongside bounded Boomer searches and Mouse 5 shooting.
+Trajectory prediction, angle and power assistance, and a Windows one-click launcher for DragonBound. The current application is **V35**, with early Turtle SS aim display while refinement continues, automatic style comparison and visible model uncertainty, alongside bounded Boomer searches and Mouse 5 shooting.
 
 ## Introduction
 

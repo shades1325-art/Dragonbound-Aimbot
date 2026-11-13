@@ -48,6 +48,13 @@
   return{nearCount:near.length,coreCount:core.length,center,span,centerError:near.length?Math.abs(center-target.x):Infinity,worstNearError:near.length?Math.max(...near.map(q=>Math.hypot(q.x-target.x,q.y-target.y))):Infinity};
  }
  function accuracyScore(q,{carrierAllowance=0,powerSensitivity=0,childTime=0}={}){return(6-q.coreCount)*10000+(6-q.nearCount)*500+q.centerError*4+q.span*.5+q.worstNearError*2+carrierAllowance*.4+powerSensitivity*2+childTime*3;}
+ function choose(candidate,current,target,options,d){
+  if(!candidate?.ready)return current;if(!current?.ready)return candidate;
+  if(candidate.predictedCoreCount!==current.predictedCoreCount)return candidate.predictedCoreCount>current.predictedCoreCount?candidate:current;
+  if(candidate.predictedNearCount!==current.predictedNearCount)return candidate.predictedNearCount>current.predictedNearCount?candidate:current;
+  if(options.preferMirror!==false&&d?.weathers?.some(w=>w.weather_type===7)&&globalThis.__reaMirror?.prefer)return globalThis.__reaMirror.prefer(candidate,current,target,{nearRadius:options.nearRadius??28,verticalTolerance:options.verticalTolerance??25});
+  return candidate.accuracyScore<current.accuracyScore?candidate:current;
+ }
  function terrainSignature(api,d,result){let hash=2166136261;for(const branch of result?.path?.branches??[]){const points=branch.points??[],step=Math.max(1,Math.ceil(points.length/64));for(let i=0;i<points.length;i+=step)hash=Math.imul(hash^Number(!!api.terrain(d,points[i].x,points[i].y)),16777619);if(branch.hit)for(const [x,y]of [[0,0],[0,2],[2,0],[-2,0]])hash=Math.imul(hash^Number(!!api.terrain(d,branch.hit.x+x,branch.hit.y+y)),16777619);}return hash;}
  function* search(api,d,m,p,target,options={}){
   const requestedMode=options.turtleSSMode??m?.turtleSSMode??'auto';
@@ -63,11 +70,11 @@
   if(!target||![target.x,target.y,p.x,p.y,p.body].every(finite))return failed(label+': chờ vị trí xe và mục tiêu');
   if(typeof api?.launch!=='function'||typeof api?.trajectory!=='function'||typeof api?.terrain!=='function')return failed(label+': chưa có bộ tính đường đạn');
   const openingMs=Math.max(100,Math.min(10000,options.openingMs??m.ssOpeningMs??2100)),releaseMs=Math.max(openingMs,options.releaseMs??m.ssReleaseMs??openingMs+500),T=openingMs/1000,release=releaseMs/1000;
-  const radius=Math.max(8,Math.min(60,options.nearRadius??28)),verticalTolerance=Math.max(5,Math.min(60,options.verticalTolerance??25)),apexTolerance=Math.max(10,Math.min(600,options.apexToleranceMs??300)),minNear=Math.max(3,Math.min(6,options.minNearCount??3)),maxCandidates=Math.max(1,Math.min(16,Math.floor(options.maxCandidates??12))),childHorizon=Math.max(.1,Math.min(5,options.childHorizon??(timebomb?1.2:5))),openingRadius=Math.max(30,Math.min(240,options.openingRadius??160));
-  const coreRadius=Math.max(8,Math.min(radius,options.coreRadius??14)),minCore=Math.max(1,Math.min(6,options.minCoreCount??3));
+  const radius=Math.max(8,Math.min(60,options.nearRadius??28)),verticalTolerance=Math.max(5,Math.min(60,options.verticalTolerance??25)),apexTolerance=Math.max(10,Math.min(600,options.apexToleranceMs??300)),minNear=Math.max(1,Math.min(6,options.minNearCount??1)),maxCandidates=Math.max(1,Math.min(16,Math.floor(options.maxCandidates??12))),childHorizon=Math.max(.1,Math.min(5,options.childHorizon??(timebomb?1.2:5))),openingRadius=Math.max(30,Math.min(240,options.openingRadius??160));
+  const coreRadius=Math.max(8,Math.min(radius,options.coreRadius??14)),minCore=Math.max(0,Math.min(6,options.minCoreCount??0));
   const openingAllowed=(opening,apexErrorMs)=>timebomb?opening.vy>0&&opening.y<target.y-4&&Math.hypot(opening.x-target.x,opening.y-target.y)<=openingRadius:apexErrorMs<=apexTolerance&&opening.y<=target.y-36;
   const now=typeof options.now==='function'?options.now():typeof performance!=='undefined'?performance.now():Date.now(),fixed=options.mode==='fixed'&&finite(options.fixedDisplay),weather=(d.weathers??[]).map(w=>[w.weather_type,w.x,w.size]),preferMirror=options.preferMirror!==false&&weather.some(w=>w[0]===7)&&!!globalThis.__reaMirror?.prefer;
-  const key=JSON.stringify([identity(api),identity(d.ground),identity(d.ground?.data),identity(d.ground?.pixels),identity(d.ground?.imageData?.data),d.ground?.revision,d.ground?.version,p.x,p.y,p.body,p.minang,p.maxang,p.aim?.[2],target.n,target.x,target.y,m.ratio,m.speedQuantization,m.ax,m.ay,m.velocityBiasX,m.velocityBiasY,m.dx,m.dy,m.sampleCount,identity(m.positionAllowance),d.wind_power,d.wind_angle,weather,openingMs,releaseMs,radius,coreRadius,minCore,verticalTolerance,apexTolerance,minNear,maxCandidates,childHorizon,options.mode,options.fixedDisplay,options.fixedLook,options.clearance,preferMirror,timebomb,openingRadius]);
+  const key=JSON.stringify([identity(api),identity(d.ground),identity(d.ground?.data),identity(d.ground?.pixels),identity(d.ground?.imageData?.data),d.ground?.revision,d.ground?.version,p.x,p.y,p.body,p.minang,p.maxang,p.aim?.[2],target.n,target.x,target.y,m.ratio,m.speedQuantization,m.ax,m.ay,m.velocityBiasX,m.velocityBiasY,m.dx,m.dy,m.sampleCount,identity(m.positionAllowance),d.wind_power,d.wind_angle,weather,openingMs,releaseMs,radius,coreRadius,minCore,verticalTolerance,apexTolerance,minNear,maxCandidates,childHorizon,options.mode,options.fixedDisplay,options.fixedLook,options.clearance,preferMirror,timebomb,openingRadius,!!options.quickPass]);
   const saved=cache.get(key);if(saved&&now>=saved.time&&now-saved.time<400){counters.cacheHits++;return{...saved.value,cacheHit:true};}
   counters.searches++;
   const save=value=>{cache.set(key,{time:typeof options.now==='function'?options.now():typeof performance!=='undefined'?performance.now():Date.now(),value});while(cache.size>16)cache.delete(cache.keys().next().value);return value;};
@@ -86,20 +93,21 @@
    candidates.push({look,angle,power,origin,start,opening,apexErrorMs,score,analyticNear:near,analyticCore:core,analyticSpan:span,mirrorHint});
   }
   for(const look of looks){
-   const angles=fixed?[options.fixedDisplay,180-options.fixedDisplay].map(theta=>look===0?180-theta-p.body:theta+p.body).filter(a=>a>=min-1e-6&&a<=max+1e-6):Array.from({length:Math.max(0,Math.floor(max)-Math.ceil(min)+1)},(_,i)=>Math.ceil(min)+i);
+   let angles=fixed?[options.fixedDisplay,180-options.fixedDisplay].map(theta=>look===0?180-theta-p.body:theta+p.body).filter(a=>a>=min-1e-6&&a<=max+1e-6):Array.from({length:Math.max(0,Math.floor(max)-Math.ceil(min)+1)},(_,i)=>Math.ceil(min)+i);
+   if(options.quickPass&&!fixed){const rank=angle=>{const o=api.launch({...p,look,ang:angle});if(!o)return Infinity;const vx=(target.x-o.x-m.ax*T*T/2)/(timebomb?T:1.5*T)-(m.velocityBiasX||0),vy=timebomb?(target.y-30-o.y-m.ay*T*T/2)/T-(m.velocityBiasY||0):-m.ay*T-(m.velocityBiasY||0),theta=normalize(Math.atan2(-vy,vx)/DEG);return Math.abs(normalize(o.angle-theta+180)-180);};angles=angles.map(angle=>({angle,rank:rank(angle)})).sort((a,b)=>a.rank-b.rank).slice(0,6).map(a=>a.angle);}
    for(const angle of [...new Set(angles)]){
     const origin=api.launch({...p,look,ang:angle});if(!origin||![origin.x,origin.y,origin.angle].every(finite))continue;origin.x+=m.dx||0;origin.y+=m.dy||0;
     const sine=Math.sin(origin.angle*DEG);if(sine<=.01)continue;
     // Invert the current wind/elevation model at opening time. Historic
     // Gunbound bars and windchart constants are not DragonBound calibration.
     const cosine=Math.cos(origin.angle*DEG),ideal=timebomb?((target.x-origin.x-(m.velocityBiasX||0)*T-m.ax*T*T/2)*cosine-(target.y-45-origin.y-(m.velocityBiasY||0)*T-m.ay*T*T/2)*sine)/(m.ratio*T):(m.ay*T+(m.velocityBiasY||0))/(m.ratio*sine),base=Math.max(1,Math.min(400,Math.round(ideal))),range=timebomb?openingRadius/(m.ratio*T):(m.ay*apexTolerance/1000+1)/(m.ratio*sine),low=Math.max(1,Math.ceil(ideal-range)),high=Math.min(400,Math.floor(ideal+range));
-    for(const delta of [-24,-16,-8,-4,-2,-1,0,1,2,4,8,16,24]){evaluate(look,angle,origin,base+delta);yield;}
+    for(const delta of options.quickPass?[-4,-1,0,1,4]:[-24,-16,-8,-4,-2,-1,0,1,2,4,8,16,24]){evaluate(look,angle,origin,base+delta);yield;}
     if(hasTornado)for(let power=1;power<=36;power+=3){evaluate(look,angle,origin,power);yield;}
     windows.push({look,angle,origin,low,high});
    }
   }
   // Expand only when the cheap seeds cannot place all six near the target.
-  if(!candidates.some(c=>c.analyticCore===6&&(!preferMirror||c.mirrorHint)))for(const w of windows)for(let power=hasWeather?1:w.low;power<=(hasWeather?400:w.high);power+=hasWeather?12:4){evaluate(w.look,w.angle,w.origin,power);yield;}
+  if(!options.quickPass&&!candidates.some(c=>c.analyticCore===6&&(!preferMirror||c.mirrorHint)))for(const w of windows)for(let power=hasWeather?1:w.low;power<=(hasWeather?400:w.high);power+=hasWeather?12:4){evaluate(w.look,w.angle,w.origin,power);yield;}
   const order=(a,b)=>b.analyticCore-a.analyticCore||b.analyticNear-a.analyticNear||(preferMirror?Number(b.mirrorHint)-Number(a.mirrorHint):0)||(a.score-b.score);
   candidates.sort(order);const refinementAngles=new Set(),refine=[];for(const candidate of candidates){const group=candidate.look+':'+candidate.angle;if(refinementAngles.has(group))continue;refinementAngles.add(group);refine.push(candidate);if(refine.length>=8)break;}
   for(const candidate of refine)for(let delta=-3;delta<=3;delta++)if(delta){evaluate(candidate.look,candidate.angle,candidate.origin,candidate.power+delta,true);yield;}
@@ -114,7 +122,7 @@
   for(const candidate of shortlist){
    tried++;counters.fullCandidates++;counters.trajectoryCalls++;
    const parent=api.trajectory(d,parentModel,candidate.origin,candidate.power,target,T,{clearance:Math.max(0,Math.min(20,options.clearance??0)),searchOnly:false,ignorePlayerContact:false});
-   yield;
+   yield{fullCandidate:true};
    if(parent?.hit||!parent?.points?.length)continue;
    const jumps=parent.jumps??[],opening=stateAt(candidate.start,openingMs,jumps),apexErrorMs=Math.abs(opening.vy/(opening.ay||m.ay))*1000;
    if(!openingAllowed(opening,apexErrorMs)||api.terrain(d,opening.x,opening.y))continue;
@@ -138,26 +146,34 @@
    if(!hasWeather)for(const delta of [-1,1]){const power=candidate.power+delta;if(power<1||power>400)continue;const shifted=fragmentStarts(startOf(m,candidate.origin,power),openingMs,releaseMs).map(s=>planeLanding(s,target.y,childHorizon));for(let i=0;i<shifted.length;i++)if(shifted[i]&&candidate.start){const baseline=planeLanding(starts[i],target.y,childHorizon);if(baseline)powerSensitivity=Math.max(powerSensitivity,Math.abs(shifted[i].x-baseline.x));else powerSensitivity=Math.max(powerSensitivity,radius*2);}else powerSensitivity=Math.max(powerSensitivity,radius*2);}
    const allowance=typeof m.positionAllowance==='function'?m.positionAllowance(candidate.power,T):0,carrierAllowance=finite(allowance)?Math.max(0,allowance):0,childTime=near.reduce((n,c)=>n+c.localHit.t,0)/count,quality={...q,carrierAllowance,powerSensitivity:hasWeather?null:powerSensitivity,childTime,uncertaintyKnown:typeof m.positionAllowance==='function',sensitivityEstimated:!hasWeather},score=accuracyScore(q,{carrierAllowance,powerSensitivity,childTime});
    const found={ready:true,provisional:true,predictedHit:false,turtleSkybomb:true,predictedNearCount:count,apexErrorMs,landingSpan:span,landingCenter:center,impactTiltDegrees,openingMs,releaseMs,origin:candidate.origin,angle:candidate.angle,displayAngle:candidate.origin.angle>90?180-candidate.origin.angle:candidate.origin.angle,look:candidate.look,power:candidate.power,target:{n:target.n,x:target.x,y:target.y},targetNumber:target.n,mobile:14,model:{...m,turtleSkybomb:true,provisional:true,mirrorEstimate:!!parent.mirrorReflections?.length||children.some(c=>c.mirrorReflections?.length),randomWeatherIgnored:weather.some(w=>w[0]===6)},path,t:nearest.hit.t,score,candidateLaw:'empirical-vx-half-scalar-round',search:{analyticCandidates:candidates.length,fullCandidates:tried,maxCandidates}};
-   Object.assign(found,{turtleTimebomb:timebomb,ssMode:timebomb?'timebomb':'skybomb',openingDistance,openingInsideTornado,predictedCoreCount:q.coreCount,accuracyScore:score,ssQuality:quality,ssLowConfidence:carrierAllowance>coreRadius||powerSensitivity>coreRadius||hasWeather});
+   Object.assign(found,{turtleTimebomb:timebomb,ssMode:timebomb?'timebomb':'skybomb',openingDistance,openingInsideTornado,predictedCoreCount:q.coreCount,accuracyScore:score,ssQuality:quality,ssLowConfidence:q.coreCount<3||carrierAllowance>coreRadius||powerSensitivity>coreRadius||hasWeather,ssSparseCluster:q.coreCount<3});
    found.model.tornadoEstimate=(parent.tornadoTransitions??parent.weatherTransitions??0)>0||children.some(c=>c.tornadoTransitions>0)||openingInsideTornado;
    if(best&&found.predictedCoreCount!==best.predictedCoreCount){if(found.predictedCoreCount>best.predictedCoreCount)best=preferMirror?globalThis.__reaMirror.prefer(found,null,target,{nearRadius:radius,verticalTolerance}):found;}
    else if(preferMirror)best=globalThis.__reaMirror.prefer(found,best,target,{nearRadius:radius,verticalTolerance});else if(!best||score<best.score)best=found;
+   yield{candidate:best};
    if(q.coreCount===6&&q.centerError<=coreRadius*.35&&powerSensitivity<=coreRadius&&(!preferMirror||best?.mirrorBenefit?.hasMirror))break;
   }
-  return save(best??failed(label+': chưa có chùm với ít nhất '+minCore+' mảnh trong vùng sát '+coreRadius+' px',{bestNearCount:bestNear,bestApexErrorMs:bestApex,search:{analyticCandidates:candidates.length,fullCandidates:tried,maxCandidates}}));
+  return save(best??failed(label+': chưa có mảnh chạm đất gần mục tiêu trong các đường đã kiểm tra',{bestNearCount:bestNear,bestApexErrorMs:bestApex,search:{analyticCandidates:candidates.length,fullCandidates:tried,maxCandidates}}));
+ }
+ function* progressive(api,d,m,p,target,options){
+  const budget=Math.max(4,Math.min(16,Math.floor(options.maxCandidates??12))),quickBudget=Math.max(2,Math.min(4,Math.floor(budget/2)));let best=null,last,used=0;
+  for(const quickPass of [true,false]){const iterator=search(api,d,m,p,target,{...options,quickPass,maxCandidates:quickPass?quickBudget:budget-used});let next;do{next=iterator.next();if(!next.done){if(next.value?.fullCandidate)used++;yield next.value;}}while(!next.done);last=next.value;best=choose(last,best,target,options,d);if(best)yield{candidate:best};}
+  return best??last;
  }
  function find(api,d,m,p,target,options={}){
   if(!options.cooperative){const iterator=search(api,d,m,p,target,options);let next;do{next=iterator.next();}while(!next.done);return next.value;}
   const clock=typeof options.sliceNow==='function'?options.sliceNow:()=>typeof performance!=='undefined'?performance.now():Date.now(),now=clock();
   const key=JSON.stringify([identity(api),identity(d?.ground),identity(d?.ground?.imageData?.data),d?.ground?.version,d?.ground?.revision,p?.x,p?.y,p?.body,p?.selected_shot,p?.minang,p?.maxang,p?.aim?.[2],target?.n,target?.x,target?.y,m?.ratio,m?.ax,m?.ay,m?.speedQuantization,m?.velocityBiasX,m?.velocityBiasY,m?.dx,m?.dy,m?.sampleCount,m?.valid,m?.ssOpeningMs,m?.ssReleaseMs,m?.turtleSSMode,identity(m?.positionAllowance),d?.wind_power,d?.wind_angle,d?.weathers?.map(w=>[w.weather_type,w.x,w.size]),options.mode,options.fixedDisplay,options.fixedLook,options.clearance,options.turtleSSMode,options.preferMirror,options.maxCandidates,options.openingMs,options.releaseMs,options.nearRadius,options.coreRadius,options.minCoreCount,options.minNearCount,options.verticalTolerance,options.apexToleranceMs,options.childHorizon,options.openingRadius]);
-  let job=jobs.get(key);if(job?.done&&now-job.time<(job.value?.ready?10000:400)&&(!job.value?.ready||job.terrain===terrainSignature(api,d,job.value)))return{...job.value,cacheHit:true};
-  if(!job||job.done){if(job?.done)cache.clear();job={iterator:search(api,d,m,p,target,options),slices:0,steps:0,done:false};jobs.set(key,job);while(jobs.size>8)jobs.delete(jobs.keys().next().value);}
+  let job=jobs.get(key);if(job?.best&&job.bestTerrain!==terrainSignature(api,d,job.best)){cache.clear();jobs.delete(key);job=null;}
+  if(job?.done&&now-job.time<(job.value?.ready?10000:400)&&(!job.value?.ready||job.terrain===terrainSignature(api,d,job.value)))return{...job.value,cacheHit:true};
+  if(!job||job.done){if(job?.done)cache.clear();job={iterator:progressive(api,d,m,p,target,options),slices:0,steps:0,done:false,best:null};jobs.set(key,job);while(jobs.size>8)jobs.delete(jobs.keys().next().value);}
   const budget=Math.max(2,Math.min(12,options.sliceBudgetMs??8)),limit=Math.max(1,Math.min(512,options.maxSliceSteps??512));let steps=0,next;
-  do{next=job.iterator.next();steps++;job.steps++;if(next.done){job.done=true;job.value=next.value;job.time=clock();job.terrain=next.value?.ready?terrainSignature(api,d,next.value):null;return next.value;}}while(steps<limit&&clock()-now<budget);
-  job.slices++;if(job.slices>=256){job.iterator.return();job.done=true;job.time=clock();job.value=failed('SS: đã hết lượt tìm cho cảnh này; thử đổi vị trí hoặc góc');return job.value;}
+  do{next=job.iterator.next();steps++;job.steps++;const candidate=next.done?next.value:next.value?.candidate;if(candidate?.ready){const best=choose(candidate,job.best,target,options,d);if(best!==job.best){job.best=best;job.bestTerrain=terrainSignature(api,d,best);}}if(next.done){job.done=true;job.value=job.best?{...job.best,ssSelectionAuto:(options.turtleSSMode??m?.turtleSSMode??'auto')==='auto',ssAlternatives:next.value?.ssAlternatives??job.best.ssAlternatives}:next.value;job.time=clock();job.terrain=job.value?.ready?terrainSignature(api,d,job.value):null;return job.value;}}while(steps<limit&&clock()-now<budget);
+  job.slices++;if(job.slices>=256){job.iterator.return();job.done=true;job.time=clock();job.value=job.best??failed('SS: đã hết lượt tìm cho cảnh này; thử đổi vị trí hoặc góc');job.terrain=job.bestTerrain;return job.value;}
+  if(job.best)return{...job.best,ready:true,pending:true,ssRefining:true,ssSelectionAuto:(options.turtleSSMode??m?.turtleSSMode??'auto')==='auto',search:{...job.best.search,slices:job.slices,steps:job.steps,sliceSteps:steps}};
   return{ready:false,pending:true,provisional:true,turtleSkybomb:true,predictedHit:false,reason:'SS: đang so sánh góc, lực và chùm mảnh',search:{slices:job.slices,steps:job.steps,sliceSteps:steps}};
  }
  const fragmentLaw=Object.freeze({provisional:true,observedEvents:10,horizontalScale:.5,scalarQuantization:'round',angleQuantization:'round',offsets:Object.freeze([...offsets])});
- Object.defineProperty(globalThis,'__reaTurtleSky',{value:Object.freeze({version:7,fragmentLaw,fragmentStarts,planeLanding,footprint,accuracyScore,find,clearCache(){cache.clear();jobs.clear();},stats(){return{...counters,cacheEntries:cache.size};}}),configurable:true});
- return{installed:true,version:7};
+ Object.defineProperty(globalThis,'__reaTurtleSky',{value:Object.freeze({version:8,fragmentLaw,fragmentStarts,planeLanding,footprint,accuracyScore,find,clearCache(){cache.clear();jobs.clear();},stats(){return{...counters,cacheEntries:cache.size};}}),configurable:true});
+ return{installed:true,version:8};
 })()

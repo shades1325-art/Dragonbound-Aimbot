@@ -103,11 +103,17 @@ test('the split finder honors a model-selected Timebomb when no option overrides
  const h=apiFixture({targetX:400});h.m.turtleSSMode='timebomb';const r=sky.find(h.api,h.d,h.m,h.p,h.target,{now:()=>7500});assert.ok(r.ready,r.reason);assert.equal(r.ssMode,'timebomb');
 });
 test('cooperative SS resumes analytic and full traces without repeating a whole search per update',()=>{
- const h=apiFixture({targetX:200});let r,calls=0;
- do{r=sky.find(h.api,h.d,h.m,h.p,h.target,{turtleSSMode:'auto',cooperative:true,maxSliceSteps:64});calls++;if(r.pending){assert.ok(r.search.sliceSteps<=64);assert.equal(r.ready,false);}}while(r.pending&&calls<200);
- assert.ok(calls>1);assert.ok(r.ready,r.reason);assert.equal(r.ssMode,'timebomb');assert.equal(r.path.childPaths.length,6);
+ const h=apiFixture({targetX:200});let r,calls=0,early=0;const before=sky.stats().fullCandidates;
+ do{r=sky.find(h.api,h.d,h.m,h.p,h.target,{turtleSSMode:'auto',cooperative:true,maxSliceSteps:64});calls++;if(r.pending){assert.ok(r.search.sliceSteps<=64);if(r.ready){early++;assert.equal(r.ssRefining,true);assert.equal(r.path.childPaths.length,6);assert.ok(r.predictedNearCount>=1);}}}while(r.pending&&calls<200);
+ assert.ok(calls>1);assert.ok(r.ready,r.reason);assert.ok(['timebomb','skybomb'].includes(r.ssMode));assert.equal(r.path.childPaths.length,6);
+ assert.ok(early>0,'a verified aim must appear before the full comparison finishes');assert.ok(sky.stats().fullCandidates-before<=12);
  const cached=sky.find(h.api,h.d,h.m,h.p,h.target,{turtleSSMode:'auto',cooperative:true,maxSliceSteps:64});assert.equal(cached.cacheHit,true);
  h.d.groundHeightAt=()=>10;const changed=sky.find(h.api,h.d,h.m,h.p,h.target,{turtleSSMode:'auto',cooperative:true,maxSliceSteps:64});assert.notEqual(changed.cacheHit,true);assert.equal(changed.pending,true);
+});
+test('a sparse verified SS estimate remains visible instead of being rejected by the old tight-count gate',()=>{
+ const h=apiFixture({targetX:700}),r=sky.find(h.api,h.d,h.m,h.p,h.target,{turtleSSMode:'timebomb',now:()=>9000});
+ assert.ok(r.ready,r.reason);assert.ok(r.predictedNearCount>=1);assert.ok(r.predictedCoreCount<3);assert.equal(r.ssSparseCluster,true);assert.equal(r.ssLowConfidence,true);assert.equal(r.predictedHit,false);
+ const strict=sky.find(h.api,h.d,h.m,h.p,h.target,{turtleSSMode:'timebomb',minNearCount:3,minCoreCount:3,now:()=>9100});assert.equal(strict.ready,false);
 });
 test('cooperative SS honors the soft clock budget between analytic powers',()=>{
  const h=apiFixture();let clock=0;const r=sky.find(h.api,h.d,h.m,h.p,h.target,{turtleSSMode:'auto',cooperative:true,sliceNow:()=>clock++,sliceBudgetMs:2});
