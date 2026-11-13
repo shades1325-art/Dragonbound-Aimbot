@@ -11,11 +11,11 @@ Seven initial wind states across three matches match a coefficient near3.4. The 
 ```
 wx = floor(windPower * cos(windAngle))
 wy = ceil(-windPower * sin(windAngle))
-ax = round(matchFactor * wx)
-ay = round(matchGravity + matchFactor * wy)
+ax = round(matchFactorX * wx)
+ay = round(matchGravity + matchFactorY * wy)
 ```
 
-The fit assumes zero horizontal wind intercept and rejects inconsistent observations. It intersects rounding intervals rather than treating quantized values as exact continuous coefficients. Exact current-wind samples take priority; inferred transfers retain uncertainty in factor/gravity. Leave-one-launch-out checks on the five later observations predict their launch speeds and accelerations within one unit. This is not a held-match or universal-wind validation. Initial ratio2.4/gravity311/factor3.4 remain uncertain priors, and wind above25 remains unverified.
+The fit assumes zero horizontal wind intercept and rejects inconsistent observations. It intersects rounding intervals rather than treating quantized values as exact continuous coefficients. Horizontal and vertical factors are fitted independently: one nearly horizontal wind sample must not force its weakly constrained coefficient onto the vertical axis. When compatible with the observations, the initial factor is retained inside the feasible interval; an unmeasured axis remains explicitly uncertain. Exact current-wind samples take priority. Leave-one-launch-out checks on the five later observations predict their launch speeds and accelerations within one unit. This is not a held-match or universal-wind validation. Initial ratio2.4/gravity311/factor3.4 remain uncertain priors, and wind above25 remains unverified.
 
 ## Surface and aiming
 

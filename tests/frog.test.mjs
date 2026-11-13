@@ -78,3 +78,7 @@ test('Frog surface qualification uses estimated target dwell and rejects self ex
  const h=angleScene(()=>true);h.p.selected_shot=2;h.m={...model.seed(h.d,h.p),frogShot:2,frogDirection:1,frogSurfaceSeconds:3};h.api.trajectory=()=>({points:[{x:190,y:0,t:1}],hit:{x:190,y:0,t:1,type:'ground'}});const path=shot.trace(h.api,h.d,h.m,{x:0,y:-20,angle:45},100,h.target);assert.ok(path.frogNearTarget);assert.ok(path.frogTargetDwell>.5);assert.ok(Math.abs(path.frogEndpoint.x-h.target.x)>40);
  const own={n:0,x:190,y:0,is_alive:true};h.d.myPlayer=own;h.d.smoke_players.push(own);const unsafe=shot.trace(h.api,h.d,h.m,{x:0,y:-20,angle:45},100,h.target);assert.equal(unsafe.frogUnsafeSurface,true);assert.equal(unsafe.frogNearTarget,false);
 });
+test('a sparse horizontal wind observation does not dictate the unmeasured vertical factor',()=>{
+ const start={x:0,y:0,ang:170,power:516,ax:3,ay:317,t:0},r=record({shot:0,bullet:64,uiPower:215,start,wind:{power:2,angle:4},checks:[0,100,500].map(time=>{const q=kernel.positionAt(start,time);return{time,x:q.x,y:q.y};})}),m=model.fit([r],{wind_power:17,wind_angle:81},player,1);
+ assert.ok(m.windModel);assert.equal(m.windModel.verticalFactorInferred,true);assert.equal(m.ay,263);assert.ok(m.positionAllowance(164,1)>30,'unmeasured vertical factor must retain broad uncertainty');
+});
