@@ -49,4 +49,14 @@ The headwind fixture contains nine tightly matched native S1/S2 pairs. Four exac
 
 Synthetic tests additionally check movement translation, terrain blocking, unknown-weather boundaries, legal angles, angle lock, path horizons, a return segment and panel integration without inventing ballistic coefficients. These tests do not establish native collision geometry, damage or a live hit rate. The fixtures contain relative coordinates and anonymous session groups; raw match records remain outside the repository and ZIP.
 
-SS, broad Hook/Backshot interpolation, compound weather and a general headwind force law remain open work.
+## SS and V32 fallback fixes
+
+SS has a separate model entry point and uses the selected SS muzzle. It shares validated ordinary flight geometry with S1/S2 calibration or priors, while remaining provisional. Four native SS prefixes support this bounded choice: three archived launches plus a fresh user-fired launch that was not used to fit the ordinary model. Maximum reference forecast error was3.81px on the archived clean prefixes and5.72px through3.75seconds on the fresh zero-wind shot. This is a trajectory comparison, not a confirmed damage/hit-rate result.
+
+SS launch descriptor speed/acceleration are not substituted for the explicit native path. The fresh descriptor records a transformation at1540ms with a500ms pause; two older SS records also have500ms between total lifetime and path duration, but omitted the transformation descriptor. V32 retains the observed descriptor separately and does not treat1540ms as a universal SS transformation time. Zero-wind SS predictions stay within4.1seconds; tailwind predictions retain the ordinary3/2.1second bounds. Headwind SS can reuse only an SS path at the same angle, power and exact wind; it never inherits an ordinary S1/S2 headwind template.
+
+The previous automatic fallback condition checked whether the current facing had a valid model. A mobile facing with the wind could therefore block Hook advice for a target against the wind, despite the target-directed physics search failing. V32 tests that target-directed coverage separately. A ready physics solution keeps priority; an unresolved headwind target may use clearly labelled Hook reference advice in Automatic mode. Physics-only and fixed-angle modes retain their choices.
+
+The ordinary model no longer rejects wind27 solely because it exceeds26. Wind outside the observed region is marked extrapolated with a shortened horizon. There are no native W27 headwind paths in the frozen validation set. The experimental general headwind ODE/polynomial models tested during development failed held-session checks and are not shipped.
+
+Broad Hook/Backshot interpolation, a general headwind SS force law, compound weather and reliable future SS transformation timing remain open work.

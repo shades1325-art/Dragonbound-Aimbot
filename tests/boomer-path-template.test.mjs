@@ -33,6 +33,10 @@ test('a recorded return segment remains a return path through the target',()=>{
  const path=Array.from({length:41},(_,i)=>{const t=i*.05;return[-200*t+200*t*t,-300*t+150*t*t,0];}).flat(),r={session:9,shotType:0,uiPower:100,worldAngle:150,wind:{power:10,angle:0},pathDuration:2050,path},h=scene(r),source=api.prepare(h.s,9),q=api.position(source,r.wind,1.4),target={n:1,x:q.x,y:q.y+14};
  const a=api.find(h.math,h.d,h.p,target,[h.s],9);assert.ok(a?.ready);assert.ok(a.path.turn);assert.ok(a.path.turn.t>.45&&a.path.turn.t<.55);assert.ok(a.path.hit.t>1.2);assert.equal(a.power,100);
 });
+test('synthetic SS templates stay in their own shot family and require exact wind',()=>{
+ const r=fixture.pairs[0].source,h=scene(r);h.s.shotType=2;h.s.bullet=51;h.p.selected_shot=2;const source=api.prepare(h.s,r.session),q=api.position(source,r.wind,.8),target={n:1,x:q.x,y:q.y+14};
+ let a=api.find(h.math,h.d,h.p,target,[h.s],r.session);assert.ok(a?.ready);assert.equal(a.model.boomerSS,true);h.d.wind_power+=1;assert.equal(api.find(h.math,h.d,h.p,target,[h.s],r.session),null);h.d.wind_power=r.wind.power;h.p.selected_shot=1;assert.equal(api.find(h.math,h.d,h.p,target,[h.s],r.session),null);
+});
 test('shared solver can use a recorded headwind path without a quadratic model',async()=>{
  const r=fixture.pairs[0].source,h=scene(r),source=api.prepare(h.s,r.session),q=api.position(source,r.wind,.8),target={n:1,x:q.x,y:q.y+14};c.__reaDragonCollector={session:r.session,calibration:[h.s],samples:[]};vm.runInContext(await readFile(new URL('aduka-autoaim.js',app),'utf8'),c);
  const a=c.__reaDragonAutoAim.find(h.math,h.d,{valid:false},h.p,target,()=>null);assert.ok(a?.ready);assert.equal(a.boomerPathTemplate,true);

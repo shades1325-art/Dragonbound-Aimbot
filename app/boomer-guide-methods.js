@@ -34,6 +34,12 @@
  // Fix50 wind chart: signed power units per one wind unit. Positions are approximate image readings.
  function fix50WindFactor(A){return interpolate(A,[[-90,10/6],[-78.75,10/8],[-67.5,10/12],[-60,10/16],[-53.13,0],[-45,-10/20],[-37.5,-10/16],[-30,-10/14],[-22.5,-10/12],[-15,-10/10],[-7.5,-10/8],[0,-10/6],[7.5,-10/5],[15,-10/4],[22.5,-10/3],[33.75,-10/2.5],[45,-10/2.5],[56.25,-10/3],[67.5,-10/3],[78.75,-10/4],[90,-10/5]]);}
  function fail(result,reason,code){result.ready=false;result.reason=reason;result.code=code;result.model={valid:false,guideEstimate:true,provisional:true,method:result.method};return result;}
+ function shouldFallback(renderer,player,target,model,measured){
+  if(measured?.ready||!target)return false;if(!model?.valid)return true;
+  // Current facing can have a valid tailwind model while the target requires
+  // an unsupported headwind shot. Its validity must not suppress Hook advice.
+  const dx=target.x-player.x,wx=renderer.wind_power*Math.cos(renderer.wind_angle*RAD);return Number.isFinite(dx)&&Number.isFinite(wx)&&dx*wx< -1e-6;
+ }
  function suggest(renderer,player,target,options={}){
   const requested=options.method??'auto',label=METHODS.find(m=>m.value===requested)?.label??requested;
   const result={ready:false,mobile:15,guideEstimate:true,provisional:true,predictedHit:false,method:requested,methodLabel:label,formula:'',source:null,warnings:[],trajectory:null,path:null};
@@ -104,5 +110,5 @@
   result.weakAngle=Number.isFinite(player.truang_min)&&Number.isFinite(player.truang_max)&&(native<player.truang_min||native>player.truang_max);if(result.weakAngle)result.warnings.push('Góc nằm ngoài vùng true-angle hiện tại.');
   result.ready=true;result.model={valid:true,guideEstimate:true,provisional:true,method,source:result.source};return result;
  }
- const api={version:1,suggest,methods:METHODS,sources:SOURCES,hookFactor,backFactor,fix50WindFactor};Object.defineProperty(globalThis,'__reaBoomerGuide',{value:api,configurable:true});return{installed:true,version:1,methods:METHODS.length};
+ const api={version:2,suggest,shouldFallback,methods:METHODS,sources:SOURCES,hookFactor,backFactor,fix50WindFactor};Object.defineProperty(globalThis,'__reaBoomerGuide',{value:api,configurable:true});return{installed:true,version:2,methods:METHODS.length};
 })()

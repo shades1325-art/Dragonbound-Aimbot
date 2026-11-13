@@ -1,6 +1,6 @@
 # DragonBound Aimbot
 
-Trajectory prediction, angle and power assistance, and a Windows one-click launcher for DragonBound. The current application is **V31**, with revised Boomer ordinary-flight calibration and bounded reuse of observed headwind paths, alongside Turtle SS modes and Mouse 5 shooting.
+Trajectory prediction, angle and power assistance, and a Windows one-click launcher for DragonBound. The current application is **V32**, with Boomer SS flight assistance, revised power calibration, target-directed Hook fallback and labelled wind27 extrapolation, alongside Turtle SS modes and Mouse 5 shooting.
 
 ## Introduction
 
@@ -15,7 +15,7 @@ The launcher finds the game tab automatically, follows new matches and restores 
 | Mobile | Implemented assistance | Main limitation |
 | --- | --- | --- |
 | Aduka | Angle/power search, initial model, movement and wind updates | Unmeasured wind conditions remain estimates |
-| Boomer | Stable ordinary-flight calibration; current-match headwind path reuse; Hook400, Backshot250, Fix50/70, Shotgun, Lob and high-angle references | Headwind reuse requires an unchanged angle/power and near-exact wind; universal return physics and special weather remain unresolved |
+| Boomer | Ordinary/SS flight estimates; current-match headwind path reuse; target-directed Hook fallback and other guide methods | Broad headwind/SS turn physics and special weather remain unresolved; wind27 is an estimate, not measured universal coverage |
 | ICE | S1/S2/SS recognition, shared and shot-specific calibration, initial estimates | Cross-wind accuracy requires more validation |
 | Turtle | S1; paired S2 terrain forecasts; direct-impact, Skybomb and Timebomb SS; optional mirror priority | Exact body collision, SS placement and combined weather remain experimental |
 | Nak | S1/SS flight and S2 terrain entry, underground segment and exit search | Complex underground geometry is estimated |

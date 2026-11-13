@@ -2,6 +2,25 @@
 
 This log uses the overlay's historical version numbers. The initial Git import contains the V27 baseline; earlier entries summarize local development milestones rather than Git tags or independently published releases.
 
+## V32 — Boomer SS, missing-force fallback and wind27 — 2026-11-13
+
+### Added
+
+- A separate Boomer SS flight model using the selected SS muzzle and validated ordinary geometry, with independent transformation observations and provisional timing labels.
+- Same-shot/exact-wind restrictions for recorded SS headwind paths; never pool them with ordinary S1/S2 headwind templates.
+- Four anonymized native SS path fixtures, including a fresh user-fired zero-wind launch through3.75seconds, plus SS selection/firing regressions.
+- Clear native SS/S1 availability reasons when a refreshed firing transaction encounters a disabled shot.
+
+### Fixed
+
+- Allow automatic Hook advice when target-directed headwind physics has no solution, even if the current facing has a valid tailwind model. Preserve measured solutions and explicit physics/fixed-angle modes.
+- Remove the hard26-wind rejection from ordinary fitting. Wind27 is retained as labelled extrapolation, with the shorter unmeasured-region horizon.
+- Retain one committed power for trusted fallback shooting; regressions cover left winds20/26/27 and the prior missing-force case.
+
+### Validation boundary
+
+All61 portable tests pass. The SS reference forecasts differ by at most5.72px on four captured clean prefixes; SS transformation timing and broad headwind behavior are not universally established. Hook fallback remains historical formula advice without a simulated collision guarantee. Development tools did not fire native test shots; the fresh SS was fired by the user.
+
 ## V31 — Boomer launch stability and observed headwind paths — 2026-11-13
 
 ### Fixed

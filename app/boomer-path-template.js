@@ -4,7 +4,7 @@
  const finite=Number.isFinite,rad=a=>a*Math.PI/180,normalize=a=>(a%360+360)%360,angleDistance=(a,b)=>Math.abs((a-b+540)%360-180);
  const angleOf=p=>normalize((p.look===0?180-p.ang:p.ang)-p.body),windVector=w=>({x:w.power*Math.cos(rad(w.angle)),y:-w.power*Math.sin(rad(w.angle))});
  function prepare(record,session){
-  if(record?.session!==session||record.mobile!==15||!record.isLocal||![0,1].includes(record.shotType)||record.bullet!==50||(record.start?.t??0)!==0||!record.player||record.weatherKnown===false||!Array.isArray(record.weathers)||!Array.isArray(record.path)||record.path.length%3||record.path.length<24||!finite(record.pathDuration)||record.pathDuration<=0||!finite(record.uiPower)||record.uiPower<1||record.uiPower>400||!Number.isInteger(record.uiPower)||record.special?.wave||record.special?.orbit)return null;
+  if(record?.session!==session||record.mobile!==15||!record.isLocal||![0,1,2].includes(record.shotType)||record.bullet!==(record.shotType===2?51:50)||(record.start?.t??0)!==0||!record.player||record.weatherKnown===false||!Array.isArray(record.weathers)||!Array.isArray(record.path)||record.path.length%3||record.path.length<24||!finite(record.pathDuration)||record.pathDuration<=0||!finite(record.uiPower)||record.uiPower<1||record.uiPower>400||!Number.isInteger(record.uiPower)||record.special?.wave||record.special?.orbit)return null;
   const p=record.player,w=record.wind,a=p.aim?.[record.shotType];if(!a||![p.x,p.y,p.ang,p.body,a.ang,a.size,w?.power,w?.angle].every(finite)||![0,1].includes(p.look))return null;
   const angle=angleOf(p),wind=windVector(w);if(w.power<=0||Math.cos(rad(angle))*wind.x>=-1e-8)return null;
   const count=record.path.length/3,dt=record.pathDuration/count/1000,points=[],x0=record.path[0],y0=record.path[1],bands=record.weathers.filter(v=>[6,7,8].includes(v.weather_type));
@@ -37,10 +37,10 @@
   return{points,hit,horizon:source.horizon,weatherEntry,tornadoEntry:weatherEntry?.type===8?weatherEntry:null,turn,boomerPathTemplate:true,provisional:true};
  }
  function find(api,d,p,target,records,session,options={}){
-  if(p?.mobile!==15||![0,1].includes(p.selected_shot)||!target||![p.x,p.y,p.body,target.x,target.y].every(finite)||typeof api?.launch!=='function'||typeof api?.terrain!=='function')return null;
+  if(p?.mobile!==15||![0,1,2].includes(p.selected_shot)||!target||![p.x,p.y,p.body,target.x,target.y].every(finite)||typeof api?.launch!=='function'||typeof api?.terrain!=='function')return null;
   const wind={power:d.wind_power,angle:d.wind_angle},candidates=[],seen=new Set();
   for(let i=records.length-1;i>=0&&candidates.length<64;i--){
-   const source=prepare(records[i],session);if(!source||!compatible(source,wind,source.angle,source.power))continue;
+   const source=prepare(records[i],session);if(!source||!compatible(source,wind,source.angle,source.power)||(p.selected_shot===2)!==(source.shot===2)||source.shot===2&&wind.power!==source.wind.power)continue;
    const look=source.look,angle=look===0?180-source.angle-p.body:source.angle+p.body;if(angle<(p.minang??0)-1e-6||angle>(p.maxang??90)+1e-6)continue;
    if(options.mode==='fixed'&&[0,1].includes(options.fixedLook)&&look!==options.fixedLook)continue;
    const origin=api.launch({...p,look,ang:angle});if(!origin||angleDistance(origin.angle,source.angle)>1e-6)continue;
@@ -51,10 +51,10 @@
   }
   candidates.sort((a,b)=>a.distance-b.distance);let best=null,tried=0;
   for(const c of candidates.slice(0,16)){tried++;const path=trace(api,d,c.source,c.origin,wind,target,options);if(path.hit?.type!=='target')continue;const delta=wind.power-c.source.wind.power,score=path.hit.t+.1*Math.abs(delta)+.003*Math.abs(c.angle-p.ang);
-   const found={ready:true,mobile:15,provisional:true,predictedHit:false,boomerPathTemplate:true,power:c.source.power,angle:c.angle,look:c.look,displayAngle:c.displayAngle,origin:c.origin,targetNumber:target.n,target:{n:target.n,x:target.x,y:target.y},t:path.hit.t,path,score,template:{sourceShot:c.source.shot,sourcePower:c.source.power,worldAngle:c.source.angle,windDelta:delta,horizon:c.source.horizon,sourceWind:c.source.wind},model:{valid:true,provisional:true,pathBased:true,boomerPathTemplate:true,sampleCount:1,maxTime:c.source.horizon,dx:c.source.dx,dy:c.source.dy,errorRadius:Math.abs(delta)>0?15:8,windInferred:delta!==0,positionAllowance:(_power,t)=>8+Math.abs(delta)*t*t},search:{fullCandidates:tried,maxCandidates:16}};
+   const found={ready:true,mobile:15,provisional:true,predictedHit:false,boomerPathTemplate:true,power:c.source.power,angle:c.angle,look:c.look,displayAngle:c.displayAngle,origin:c.origin,targetNumber:target.n,target:{n:target.n,x:target.x,y:target.y},t:path.hit.t,path,score,template:{sourceShot:c.source.shot,sourcePower:c.source.power,worldAngle:c.source.angle,windDelta:delta,horizon:c.source.horizon,sourceWind:c.source.wind},model:{valid:true,provisional:true,pathBased:true,boomerSS:c.source.shot===2,ssTimingUnknown:c.source.shot===2,boomerPathTemplate:true,sampleCount:1,maxTime:c.source.horizon,dx:c.source.dx,dy:c.source.dy,errorRadius:Math.abs(delta)>0?15:8,windInferred:delta!==0,positionAllowance:(_power,t)=>8+Math.abs(delta)*t*t},search:{fullCandidates:tried,maxCandidates:16}};
    if(!best||score<best.score)best=found;
   }
   if(best)best.search.fullCandidates=tried;return best;
  }
- Object.defineProperty(globalThis,'__reaBoomerPaths',{value:Object.freeze({version:1,prepare,position,compatible,trace,find}),configurable:true});return{installed:true,version:1};
+ Object.defineProperty(globalThis,'__reaBoomerPaths',{value:Object.freeze({version:2,prepare,position,compatible,trace,find}),configurable:true});return{installed:true,version:2};
 })()

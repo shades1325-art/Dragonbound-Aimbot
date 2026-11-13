@@ -20,6 +20,7 @@ V29 removes the false S2 rectangle stop, adds conservative wind coverage and mir
 | Nak S2 | Continuous terrain entry/exit is modeled from limited observed transitions | Compare underground exits on slopes, thin ground and irregular destructible terrain with a captured terrain snapshot |
 | Mirror/tornado combinations | Elevated/repeated mirrors and combined weather are incompletely validated | Match recorded transitions and final contacts for isolated and combined effects, including multi-projectile shots |
 | Boomer hook/backshot | V31 can reuse exact-angle/power current-match paths with near-exact wind; a universal headwind/apex transition law is unresolved | Validate distinct angle/power/wind changes independently; expand the bounded observed-path method without extending a short quadratic through a headwind phase change |
+| Boomer SS and wind27 | V32 adds ordinary SS geometry and target-directed fallback, while SS transformation timing and W27 headwind lack broad native validation | Capture SS transformation/path clocks independently and validate new headwind trajectories without treating formula advice as a simulated hit |
 
 ## P2 — Reliability and performance
 

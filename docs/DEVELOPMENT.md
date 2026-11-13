@@ -39,7 +39,7 @@ npm.cmd --prefix app test
 
 The syntax check parses application JavaScript and example JSON without connecting to a browser. Tests use synthetic players, terrain and DOM stubs or pure target-selection policies. They never fire a real shot or start a live game.
 
-The repository started from V27 and includes V28 SS/firing, V29 S2/mirror and V30 Timebomb improvements. Minimal anonymized fixtures test 42 SS fragment descriptors and 36 S2 wave positions. Synthetic tests cover timing, wind coverage, body-region continuation, terrain proximity, mirror ranking, firing guards, descending Timebomb opening, elevated targets, angle lock and SS mode changes. More extensive native-shot/weather evidence remains local. See [Known issues](KNOWN_ISSUES.md) before extending accuracy claims.
+The repository started from V27 and includes V28 SS/firing, V29 S2/mirror, V30 Timebomb and V31/V32 Boomer improvements. Anonymized fixtures test42 Turtle SS fragment descriptors,36 S2 wave positions,79 ordinary Boomer paths, nine headwind pairs and four Boomer SS prefixes. Synthetic tests cover timing, wind coverage, body-region continuation, terrain proximity, mirror ranking, firing guards, Timebomb, angle lock, SS selection, target-directed guide fallback and disabled-shot handling. More extensive native-shot/weather evidence remains local. See [Known issues](KNOWN_ISSUES.md) before extending accuracy claims.
 
 ## Build a portable ZIP
 
