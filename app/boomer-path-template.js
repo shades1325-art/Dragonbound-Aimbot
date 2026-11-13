@@ -21,7 +21,7 @@
  }
  function compatible(source,wind,angle,power){return source&&finite(wind?.power)&&finite(wind?.angle)&&wind.power>0&&Math.abs(wind.power-source.wind.power)<=1&&angleDistance(wind.angle,source.wind.angle)<1e-6&&angleDistance(angle,source.angle)<1e-6&&power===source.power&&Math.cos(rad(angle))*windVector(wind).x< -1e-8;}
  function trace(api,d,source,origin,wind,target,options={}){
-  const points=[],bands=(d.weathers??[]).filter(w=>[6,7,8].includes(w.weather_type)),clearance=Math.max(0,Math.min(20,options.clearance??0));let hit=null,weatherEntry=null,turn=null,previous=null,lastSign=0;
+  const points=[],bands=(d.weathers??[]).filter(w=>[7,8].includes(w.weather_type)),clearance=Math.max(0,Math.min(20,options.clearance??0));let hit=null,weatherEntry=null,turn=null,previous=null,lastSign=0;
   for(let t=0;t<=source.horizon+1e-8;){
    const q=position(source,wind,t),point={x:origin.x+q.x,y:origin.y+q.y,t};
    if(previous){const sign=Math.sign(point.x-previous.x);if(lastSign&&sign&&sign!==lastSign&&!turn)turn={...previous,observedTemplate:true};if(sign)lastSign=sign;}
@@ -51,10 +51,10 @@
   }
   candidates.sort((a,b)=>a.distance-b.distance);let best=null,tried=0;
   for(const c of candidates.slice(0,16)){tried++;const path=trace(api,d,c.source,c.origin,wind,target,options);if(path.hit?.type!=='target')continue;const delta=wind.power-c.source.wind.power,score=path.hit.t+.1*Math.abs(delta)+.003*Math.abs(c.angle-p.ang);
-   const found={ready:true,mobile:15,provisional:true,predictedHit:false,boomerPathTemplate:true,power:c.source.power,angle:c.angle,look:c.look,displayAngle:c.displayAngle,origin:c.origin,targetNumber:target.n,target:{n:target.n,x:target.x,y:target.y},t:path.hit.t,path,score,template:{sourceShot:c.source.shot,sourcePower:c.source.power,worldAngle:c.source.angle,windDelta:delta,horizon:c.source.horizon,sourceWind:c.source.wind},model:{valid:true,provisional:true,pathBased:true,boomerSS:c.source.shot===2,ssTimingUnknown:c.source.shot===2,boomerPathTemplate:true,sampleCount:1,maxTime:c.source.horizon,dx:c.source.dx,dy:c.source.dy,errorRadius:Math.abs(delta)>0?15:8,windInferred:delta!==0,positionAllowance:(_power,t)=>8+Math.abs(delta)*t*t},search:{fullCandidates:tried,maxCandidates:16}};
+   const found={ready:true,mobile:15,provisional:true,predictedHit:false,boomerPathTemplate:true,power:c.source.power,angle:c.angle,look:c.look,displayAngle:c.displayAngle,origin:c.origin,targetNumber:target.n,target:{n:target.n,x:target.x,y:target.y},t:path.hit.t,path,score,template:{sourceShot:c.source.shot,sourcePower:c.source.power,worldAngle:c.source.angle,windDelta:delta,horizon:c.source.horizon,sourceWind:c.source.wind},model:{valid:true,provisional:true,pathBased:true,randomWeatherIgnored:d.weathers?.some(w=>w.weather_type===6),boomerSS:c.source.shot===2,ssTimingUnknown:c.source.shot===2,boomerPathTemplate:true,sampleCount:1,maxTime:c.source.horizon,dx:c.source.dx,dy:c.source.dy,errorRadius:Math.abs(delta)>0?15:8,windInferred:delta!==0,positionAllowance:(_power,t)=>8+Math.abs(delta)*t*t},search:{fullCandidates:tried,maxCandidates:16}};
    if(!best||score<best.score)best=found;
   }
   if(best)best.search.fullCandidates=tried;return best;
  }
- Object.defineProperty(globalThis,'__reaBoomerPaths',{value:Object.freeze({version:2,prepare,position,compatible,trace,find}),configurable:true});return{installed:true,version:2};
+ Object.defineProperty(globalThis,'__reaBoomerPaths',{value:Object.freeze({version:3,prepare,position,compatible,trace,find}),configurable:true});return{installed:true,version:3};
 })()

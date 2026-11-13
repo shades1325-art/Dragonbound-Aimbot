@@ -2,6 +2,26 @@
 
 This log uses the overlay's historical version numbers. The initial Git import contains the V27 baseline; earlier entries summarize local development milestones rather than Git tags or independently published releases.
 
+## V33 — Boomer search responsiveness and high arcs — 2026-11-13
+
+### Fixed
+
+- Replace the synchronous Boomer candidate/weather grid with a resumable, bounded search and a visible pending state.
+- Remove duplicate current-angle solutions and automatic manual-power previews for Boomer. Reuse scene results across the angle/look changes produced by auto-apply itself.
+- End a difficult search burst rather than consuming an entire turn indefinitely; validate cached paths against terrain changes.
+- Restore ordinary prediction through Random weather with an uncertainty label, preserving the requested behavior.
+
+### Added
+
+- Coarse terrain pruning, typed-terrain checks and full-path verification for successful candidates; at most256 diverse queued candidates, six precise checks per slice and32 updates per burst.
+- Automatic escalation to a longer high-arc pass when short ordinary paths fail; explicit high-arc mode uses up to8seconds without wind or6seconds for a supported ordinary/tailwind model, marked as extrapolation.
+- Bounded reflected-target seeds using the existing empirical mirror geometry, avoiding the former numeric weather grid.
+- Regressions for cooperative progress, time budgets, stable angle application, terrain refresh, duplicate-preview removal, high arcs, Random and mirrors.
+
+### Validation boundary
+
+The8ms slice target is checked between candidates and can be exceeded by one check. Longer high arcs are extrapolated beyond the measured data. This update does not establish a universal headwind model or guarantee all-weather hit accuracy. Live freeze/frame-rate verification requires an active game tab.
+
 ## V32 — Boomer SS, missing-force fallback and wind27 — 2026-11-13
 
 ### Added

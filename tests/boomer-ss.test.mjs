@@ -20,7 +20,7 @@ test('SS transformation observation is retained separately from pre-shot geometr
 test('SS rejects unmeasured headwind physics and stays separate from ordinary shot selection',()=>{
  const p={mobile:15,selected_shot:2,look:1,ang:50,body:0};assert.equal(api.fit([],{wind_power:20,wind_angle:180},p,9).valid,false);assert.equal(api.fit([],{wind_power:0,wind_angle:0},{...p,selected_shot:1},9),null);
 });
-async function setup(){const h=await overlayFixture();for(const f of ['boomer-zero-prior.js','boomer-live-model.js','boomer-ss.js','boomer-path-template.js','boomer-guide-methods.js'])vm.runInContext(await readFile(new URL(f,app),'utf8'),h.context);
+async function setup(){const h=await overlayFixture();for(const f of ['boomer-zero-prior.js','boomer-live-model.js','boomer-ss.js','boomer-path-template.js','boomer-guide-methods.js','boomer-search.js'])vm.runInContext(await readFile(new URL(f,app),'utf8'),h.context);
  Object.assign(h.p,{mobile:15,selected_shot:2,look:1,ang:50,body:0,x:300,y:400,minang:10,maxang:90,mobile_data:{name:'Boomer',bullets:[50,51]},aim:[{ang:70,size:30},{ang:70,size:30},{ang:70,size:80}]});h.renderer.wind_power=0;h.renderer.weathers=[];h.collector.samples=[];h.collector.calibration=[];Object.assign(h.target,{x:800,y:400});h.nodes.get('rea-aduka-auto-adjust').checked=false;h.aim.settings.allowLongArc=true;h.step(1100);return h;}
 test('SS becomes ready using its own muzzle without needing two new calibration shots',async()=>{
  const h=await setup(),r=h.aim.autoResult;assert.ok(r?.ready,r?.reason);assert.equal(r.model.boomerSS,true);assert.ok(r.model.maxTime<=4.1);assert.notEqual(r.model.longArcExtrapolated,true);assert.ok(Math.abs(r.origin.x-(300+Math.cos(rad(70))*80))<1e-8);assert.equal(h.aim.errors.length,0);

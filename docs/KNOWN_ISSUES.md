@@ -28,6 +28,7 @@ V29 removes the false S2 rectangle stop, adds conservative wind coverage and mir
 | --- | --- | --- |
 | Client binding | The loader depends on internal client handlers and closure structure | Detect unsupported client layouts clearly and test a maintained set of compatible layouts |
 | Difficult weather searches | Searches are bounded, but expensive scenes can still take longer | Profile worst-case multi-projectile terrain/weather scenes and compare p95/max search times and frame pacing |
+| Boomer long arcs | V33 permits longer high-arc estimates and bounds each search burst; ordinary calibration still has shorter native coverage | Obtain held-out long high-angle paths in each wind class and compare geometry separately from frame responsiveness |
 | Chrome profiles | The loader reads the standard Chrome user-data directory | Add an explicit profile/endpoint option without changing game-origin restrictions |
 | Multiple game tabs | Ambiguous targets wait rather than guessing | Add a user-facing tab picker and persist only the chosen local target |
 | Loader stop | Stop ends tracking/recovery; the page overlay stays until reload | Add an explicit teardown path and verify removal of owned elements/listeners without disturbing game state |

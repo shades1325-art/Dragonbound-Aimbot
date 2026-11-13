@@ -59,4 +59,18 @@ The previous automatic fallback condition checked whether the current facing had
 
 The ordinary model no longer rejects wind27 solely because it exceeds26. Wind outside the observed region is marked extrapolated with a shortened horizon. There are no native W27 headwind paths in the frozen validation set. The experimental general headwind ODE/polynomial models tested during development failed held-session checks and are not shipped.
 
+## V33 responsiveness and high arcs
+
+The previous Boomer path search could trace every candidate synchronously and then enter a large numeric weather grid. The panel also calculated duplicate current-angle solutions and manual-power previews during automatic aiming. These costs could repeat after auto-application changed the current angle.
+
+V33 gives Boomer its own resumable search. It preserves a diverse set of at most256 angle/power candidates, performs coarse terrain rejection and uses a fast typed-terrain check without allocating failed drawing paths. A successful candidate is verified with the full trajectory before display. Each update targets an8ms work budget and at most six precise checks. The budget is checked between candidates, so an individual check can overrun it; it is not a preemptive deadline. A burst stops after at most32 updates rather than searching indefinitely. No synchronous angle-by-power weather grid runs for Boomer.
+
+Scene keys exclude the angle/look changed by auto-apply. Successful paths are reused and periodically rechecked against current terrain; movement, body slope, target, wind, shot and new observations invalidate the relevant scene. Pending searches resume on the next panel update rather than waiting for the normal500ms refresh interval. Formula fallback waits until the relevant search pass is no longer pending.
+
+Automatic mode can advance to a longer high-arc pass when the ordinary pass has no solution. Explicit high-arc mode starts there directly. Zero-wind bounds expand to8seconds, supported ordinary/tailwind bounds to6seconds, with increased uncertainty beyond the calibrated horizon. This fixes the former inability to consider long high arcs merely because the short model stopped at2.1/3/4.1seconds. It does not establish accurate general headwind dynamics or high-arc native collision accuracy. Fixed-angle mode keeps its chosen angle unless its separate long-arc setting permits the existing ordinary zero-wind extrapolation.
+
+Random weather continues ordinary prediction as requested, while remaining labelled unverified. Mirror virtual-target seeds use the predictor's trigger/ejection geometry and are checked by full reflected trajectories, preserving an estimate without the unbounded weather grid. Native input is not disabled while a search runs. The aim-fire action still declines a pending/invalid solution, and ordinary game firing remains available.
+
+The private synthetic thin-wall benchmark uses the actual trajectory/terrain code. Its last run's longest call was about19ms; this is a local simulation, not live frame-rate evidence. Automated regressions check bounded progress, end-of-burst behavior, terrain invalidation, stable angle application, duplicate-preview removal, automatic high-arc escalation and reflected paths.
+
 Broad Hook/Backshot interpolation, a general headwind SS force law, compound weather and reliable future SS transformation timing remain open work.

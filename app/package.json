@@ -1,13 +1,13 @@
 {
   "name": "dragonbound-oneclick",
-  "version": "32.0.0",
+  "version": "33.0.0",
   "private": true,
   "type": "module",
   "description": "DragonBound trajectory overlay and Windows one-click launcher",
   "engines": { "node": ">=24" },
   "scripts": {
     "check": "node ../scripts/check.mjs",
-    "test": "node --test ../tests/runtime-recovery.test.mjs ../tests/target-selection.test.mjs ../tests/moving-overlay.test.mjs ../tests/turtle-ss.test.mjs ../tests/aim-fire.test.mjs ../tests/turtle-model-wind.test.mjs ../tests/turtle-s2.test.mjs ../tests/mirror-priority.test.mjs ../tests/boomer-model.test.mjs ../tests/boomer-path-template.test.mjs ../tests/boomer-ss.test.mjs ../tests/boomer-fallback.test.mjs"
+    "test": "node --test ../tests/runtime-recovery.test.mjs ../tests/target-selection.test.mjs ../tests/moving-overlay.test.mjs ../tests/turtle-ss.test.mjs ../tests/aim-fire.test.mjs ../tests/turtle-model-wind.test.mjs ../tests/turtle-s2.test.mjs ../tests/mirror-priority.test.mjs ../tests/boomer-model.test.mjs ../tests/boomer-path-template.test.mjs ../tests/boomer-ss.test.mjs ../tests/boomer-fallback.test.mjs ../tests/boomer-search.test.mjs"
   },
   "dependencies": { "ws": "8.21.0" }
 }

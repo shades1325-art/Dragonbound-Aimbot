@@ -36,7 +36,8 @@ test('unmeasured wind and angle coverage stays labelled with a shorter horizon',
  const p={mobile:15,selected_shot:1,look:1,ang:45,body:0},m=api.prior({wind_power:20,wind_angle:40},p);assert.ok(m?.valid);assert.equal(m.windExtrapolated,true);assert.equal(m.maxTime,2.1);
  const high=api.prior({wind_power:15,wind_angle:319},{...p,ang:89});assert.ok(high.angleExtrapolated);assert.equal(high.maxTime,2.1);assert.ok(high.positionAllowance(200,2)>15);
 });
-test('ordinary Boomer forecasts stop at unvalidated special-weather columns',async()=>{
+test('ordinary Boomer stops at unresolved tornadoes and keeps normal flight for random weather',async()=>{
  const h=await overlayFixture(),m=api.prior({wind_power:15,wind_angle:319},{mobile:15,selected_shot:1,look:1,ang:38,body:0});h.context.__reaTornadoMethod={trace(){throw Error('Do not invent post-weather headwind physics');}};
- for(const type of [6,7,8]){h.renderer.weathers=[{weather_type:type,x:400,size:40}];const path=h.aim.api.trajectory(h.renderer,m,{x:300,y:100,angle:38},200,{x:900,y:100},2);assert.equal(path.hit,null);assert.equal(path.weatherEntry.type,type);assert.ok(path.points.at(-1).x<400);}
+ h.renderer.weathers=[{weather_type:8,x:400,size:40}];let path=h.aim.api.trajectory(h.renderer,m,{x:300,y:100,angle:38},200,{x:900,y:100},2);assert.equal(path.hit,null);assert.equal(path.weatherEntry.type,8);assert.ok(path.points.at(-1).x<400);
+ h.renderer.weathers=[{weather_type:6,x:400,size:40}];path=h.aim.api.trajectory(h.renderer,m,{x:300,y:100,angle:38},200,{x:900,y:100},2);assert.equal(path.weatherEntry,null);assert.ok(path.points.at(-1).x>400);
 });

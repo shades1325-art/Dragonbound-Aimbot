@@ -1,6 +1,6 @@
 # DragonBound Aimbot
 
-Trajectory prediction, angle and power assistance, and a Windows one-click launcher for DragonBound. The current application is **V32**, with Boomer SS flight assistance, revised power calibration, target-directed Hook fallback and labelled wind27 extrapolation, alongside Turtle SS modes and Mouse 5 shooting.
+Trajectory prediction, angle and power assistance, and a Windows one-click launcher for DragonBound. The current application is **V33**, with bounded Boomer searches, automatic high-arc fallback, SS flight assistance and target-directed Hook advice, alongside Turtle SS modes and Mouse 5 shooting.
 
 ## Introduction
 
