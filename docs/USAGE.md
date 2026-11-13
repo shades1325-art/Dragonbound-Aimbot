@@ -52,6 +52,10 @@ The power-bar marker shows the suggested force on the game's 0–400 scale. It m
 
 The default method prefers a learned flight model and can fall back to reference advice when model coverage is insufficient. Physics-only mode avoids formula fallback. Other choices include Hook400, Backshot250, Fix50/70, Shotgun400, angle 35, Lob and high-angle methods.
 
+V31 stabilizes the launch-power slope and uses a broader ordinary/tailwind fallback with explicit uncertainty. Its normal horizon is at most three seconds; winds outside the measured convex region or angles outside the sampled range shorten it to 2.1 seconds. Current-match calibration has priority. Boomer ordinary forecasts stop before unresolved random/mirror/tornado columns.
+
+In **Automatic** or **Physics-only** mode, headwind aiming can also reuse a path recorded in the current match. It keeps that path's exact world angle and power, accepts the same wind direction with a strength difference no greater than one, and checks the translated path against current terrain. S1/S2 may share this limited path evidence. Movement updates the origin and native slope angle, but a path is unavailable if the required angle is no longer legal. This feature searches available recorded paths; it does not invent a new Hook/Backshot force. The panel distinguishes recorded-headwind estimates from ordinary-flight estimates. Explicit Hook/Backshot choices remain reference formulas. See [Boomer models](BOOMER_MODELS.md).
+
 Reference advice comes from older Gunbound guides and has explicit unavailable regions. Height differences and terrain can reduce its usefulness. Do not interpret formula advice without a simulated path as a confirmed collision prediction.
 
 ### Turtle

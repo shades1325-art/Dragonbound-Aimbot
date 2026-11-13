@@ -1,6 +1,6 @@
 # DragonBound Aimbot
 
-Trajectory prediction, angle and power assistance, and a Windows one-click launcher for DragonBound. The current application is **V30**, with Turtle Timebomb SS, mirror priority, revised S2 contact forecasts and Mouse 5 shooting.
+Trajectory prediction, angle and power assistance, and a Windows one-click launcher for DragonBound. The current application is **V31**, with revised Boomer ordinary-flight calibration and bounded reuse of observed headwind paths, alongside Turtle SS modes and Mouse 5 shooting.
 
 ## Introduction
 
@@ -15,7 +15,7 @@ The launcher finds the game tab automatically, follows new matches and restores 
 | Mobile | Implemented assistance | Main limitation |
 | --- | --- | --- |
 | Aduka | Angle/power search, initial model, movement and wind updates | Unmeasured wind conditions remain estimates |
-| Boomer | Learned flight models; Hook400, Backshot250, Fix50/70, Shotgun, Lob and high-angle reference methods | Some formula regions and complex weather have incomplete coverage |
+| Boomer | Stable ordinary-flight calibration; current-match headwind path reuse; Hook400, Backshot250, Fix50/70, Shotgun, Lob and high-angle references | Headwind reuse requires an unchanged angle/power and near-exact wind; universal return physics and special weather remain unresolved |
 | ICE | S1/S2/SS recognition, shared and shot-specific calibration, initial estimates | Cross-wind accuracy requires more validation |
 | Turtle | S1; paired S2 terrain forecasts; direct-impact, Skybomb and Timebomb SS; optional mirror priority | Exact body collision, SS placement and combined weather remain experimental |
 | Nak | S1/SS flight and S2 terrain entry, underground segment and exit search | Complex underground geometry is estimated |
@@ -52,6 +52,7 @@ The existing in-game panel contains Vietnamese labels; all repository documentat
 
 - [Usage and troubleshooting](docs/USAGE.md)
 - [Turtle Timebomb reference and implementation](docs/TURTLE_REFERENCE.md)
+- [Boomer models and validation boundaries](docs/BOOMER_MODELS.md)
 - [Changelog](CHANGELOG.md)
 - [Known issues and prioritized fixes](docs/KNOWN_ISSUES.md)
 - [Development, tests and portable packaging](docs/DEVELOPMENT.md)

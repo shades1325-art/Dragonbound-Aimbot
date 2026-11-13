@@ -2,6 +2,27 @@
 
 This log uses the overlay's historical version numbers. The initial Git import contains the V27 baseline; earlier entries summarize local development milestones rather than Git tags or independently published releases.
 
+## V31 — Boomer launch stability and observed headwind paths — 2026-11-13
+
+### Fixed
+
+- Stop freely fitting the ordinary Boomer launch slope from a small set of nearby powers. Use an archive-validated fixed slope with current-match velocity/origin calibration; retain power extrapolation allowance.
+- Use truncated signed wind components in the ordinary fallback, addressing the systematic negative-axis bias in the previous floor-based law.
+- Bound ordinary prediction by observed duration, at most three seconds; mark unmeasured wind/angle regions and shorten their fallback to 2.1 seconds.
+- Keep headwind phase changes out of the ordinary quadratic model. New ordinary forecasts stop at unvalidated special-weather columns.
+
+### Added
+
+- Current-match headwind S1/S2 path reuse at an unchanged world angle and integer power, identical wind direction and strength difference no greater than one.
+- Bounded candidate tracing against current terrain, translated muzzle positions, native angle limits and optional angle lock. No path is extrapolated beyond its observed prefix.
+- Distinct ordinary/headwind labels and committed-shot metadata. Explicit Hook/Backshot guide modes retain their reference-only behavior.
+- Preserve an active Boomer sampling controller during an overlay/model update when its controller and adapter versions are unchanged, retaining its original budget and sequence.
+- Anonymized evidence fixtures:79 ordinary paths across20 sessions and nine paired headwind launches; whole-session holdout and integration regressions.
+
+### Validation boundary
+
+The ordinary model's held-session worst point error is about11.75px within the sampled prefixes through3seconds. Nine tightly matched headwind pairs support limited reuse, with a worst corrected displacement error about6.72px. These are trajectory comparisons, not live hit rates. General headwind turn physics, SS and post-column weather behavior remain unresolved; see [Boomer models](docs/BOOMER_MODELS.md).
+
 ## V30 — Turtle Timebomb reference integration — 2026-11-13
 
 ### Added

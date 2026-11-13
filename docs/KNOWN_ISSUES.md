@@ -19,7 +19,7 @@ V29 removes the false S2 rectangle stop, adds conservative wind coverage and mir
 | Raon mines/robot | Only airborne flight and placement are predicted | Capture complete landing-to-movement-to-detonation sequences with ownership and target information; do not substitute animation range for blast radius |
 | Nak S2 | Continuous terrain entry/exit is modeled from limited observed transitions | Compare underground exits on slopes, thin ground and irregular destructible terrain with a captured terrain snapshot |
 | Mirror/tornado combinations | Elevated/repeated mirrors and combined weather are incompletely validated | Match recorded transitions and final contacts for isolated and combined effects, including multi-projectile shots |
-| Boomer hook/backshot | Reference formulas have unavailable regions and differ from a fully simulated learned path | Expand measured trajectory coverage and compare return paths, height differences and terrain clearance without fabricating paths for formula-only advice |
+| Boomer hook/backshot | V31 can reuse exact-angle/power current-match paths with near-exact wind; a universal headwind/apex transition law is unresolved | Validate distinct angle/power/wind changes independently; expand the bounded observed-path method without extending a short quadratic through a headwind phase change |
 
 ## P2 — Reliability and performance
 
@@ -46,4 +46,4 @@ The local V27 development pass tested Grub's three-shot model selection, four S2
 
 The three-second S2 lifetime was observed in four projectiles from one burst. It is implemented for S2 only and still needs independent-burst validation. It is not an established SS fuse rule.
 
-The portable repository tests cover recovery, movement/aim refresh, firing transactions, wind coverage, mirror ranking, S2 ground tracing, 36 anonymized S2 wave positions and 42 native SS fragment descriptors. They include synthetic weather cases; no native weather-transformed SS split has been validated. Passing them does not establish all-wind or exact native body-collision accuracy.
+The portable repository tests cover recovery, movement/aim refresh, firing transactions, wind coverage, mirror ranking, S2 ground tracing, 36 anonymized S2 wave positions and 42 native SS fragment descriptors. V31 adds 79 anonymized ordinary Boomer trajectories and nine headwind S1/S2 pairs, plus whole-session holdout checks and synthetic path/terrain integration. They include synthetic weather cases; no native weather-transformed SS split has been validated. Passing them does not establish all-wind or exact native body-collision accuracy.
