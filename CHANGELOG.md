@@ -2,6 +2,16 @@
 
 This log uses the overlay's historical version numbers. The initial Git import contains the V27 baseline; earlier entries summarize local development milestones rather than Git tags or independently published releases.
 
+## V36 — Frog assistance — 2026-11-14
+
+- Add Frog S1/S2/SS recognition to model selection, overlay, angle/power application, firing and launcher recovery. S1/S2 share carrier64, SS uses66; continuations65/67 are linked to a unique matching parent rather than the nearest player.
+- Calibrate ordinary carrier speed/wind from current-match samples, sharing compatible shot data and preserving round/floor interval uncertainty. Retained low-force observations support the initial ratio2.4; seven wind states support an explicitly empirical3.4/x-floor/y-ceil candidate with match-specific gravity.
+- Estimate the surface endpoint after landing, with separate orange dashed surface paths. S1 uses observed net-left motion, S2/SS net-right; ordinary/SS durations are approximately1.5/3seconds. A50px/s contour marcher is an engineering midpoint of observed37–74px/s, not a recovered native law.
+- Add bounded cooperative endpoint search, early ready suggestions, stable auto-apply caching and sampled-terrain invalidation. Unknown edges/walls stop the estimate and remain labelled.
+- Add anonymized native carrier/continuation fixtures and regressions for all shot mappings, calibration isolation, endpoint search, movement, ownership, trusted firing and surface limits.
+
+No developer test shots are fired. Surface continuations are excluded from air calibration. Predictions retain `predictedHit:false`; native collision, detonation, damage and complex weather remain unverified.
+
 ## V35 — Earlier Turtle SS aim and partial estimates — 2026-11-13
 
 - Add a quick pass around analytically promising angles and powers before the broad search. The default twelve full-candidate checks are shared between quick/refinement passes and both styles.

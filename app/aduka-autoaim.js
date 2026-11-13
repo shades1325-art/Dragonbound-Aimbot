@@ -1,6 +1,6 @@
 (() => {
  function find(api,renderer,model,player,target,modelForPlayer,options={}){
-  if(![2,11,14,15,17,19].includes(player?.mobile)&&!['Ice','Turtle','Nak','Raon','Raon Launcher','Grub'].includes(player?.mobile_data?.name))return{ready:false,reason:'Autoaim hỗ trợ Aduka, Boomer, ICE, Turtle, Nak, Raon và Grub'};
+  if(![2,11,14,15,17,19,21].includes(player?.mobile)&&!['Ice','Turtle','Nak','Raon','Raon Launcher','Grub','Frog'].includes(player?.mobile_data?.name))return{ready:false,reason:'Autoaim hỗ trợ Aduka, Boomer, ICE, Turtle, Nak, Raon và Grub'};
   if(player.mobile===2&&player.selected_shot>1)return{ready:false,reason:'Autoaim Aduka hiện hỗ trợ S1 và S2'};
   if(!target)return{ready:false,reason:'Chọn mục tiêu trong danh sách'};
   if(player.mobile===15&&globalThis.__reaBoomerSearch)return globalThis.__reaBoomerSearch.find(api,renderer,model,player,target,modelForPlayer,options);
@@ -14,6 +14,7 @@
    const reflected=globalThis.__reaTornadoMethod?.find(api,renderer,model,player,target,{...options,requireMirror:true});
    return mirror.prefer(reflected,normal,target);
   }
+  if(model?.frog)return globalThis.__reaFrogShot?.find(api,renderer,model,player,target,{...options,cooperative:true})??{ready:false,reason:'Frog: waiting for predictor'};
   if(model?.grub)return globalThis.__reaGrubShot?.find(api,renderer,model,player,target,options)??{ready:false,reason:'Chưa nạp bộ tính Grub'};
   if(model?.raon)return globalThis.__reaRaonShot?.find(api,renderer,model,player,target,options)??{ready:false,reason:'Chưa nạp bộ tính Raon'};
   if(model?.nakAirOnly)return globalThis.__reaNakShot?.find(api,renderer,model,player,target,options)??{ready:false,reason:'Chưa nạp bộ tính Nak S2 chui đất'};
@@ -46,6 +47,6 @@
   if(renderer.weathers?.some(w=>[7,8].includes(w.weather_type))&&globalThis.__reaTornadoMethod){const result=globalThis.__reaTornadoMethod.find(api,renderer,model,player,target,options);if(result)return result;}
   return{ready:false,reason:player.mobile===15&&model?.windExtrapolated&&!blockedWeather?'Boomer: gió ngoài vùng mẫu; chưa có đường trong giới hạn dự đoán '+model.maxTime+' giây':model?.turtleSS?'SS nổ trực tiếp: chưa có điểm chạm đất sát mục tiêu trước khi bung':blockedWeather?'Đường bắn qua lốc/gương: chưa đủ dữ liệu':!candidates.length&&player.mobile===15&&!model?.valid?model?.reason||'Boomer: chưa có mô hình cho gió / loại đạn này':fixed?'Góc đang giữ chưa vượt được địa hình; đổi góc hoặc chọn Tự động':'Chưa có góc và lực vượt địa hình đến mục tiêu'};
  }
- function apply(player,result){if(!result?.ready)return{applied:false,reason:result?.reason||'Chưa có nghiệm'};if(![2,11,14,15,17,19].includes(player.mobile)&&!['Ice','Turtle','Nak','Raon','Raon Launcher','Grub'].includes(player.mobile_data?.name)||result.mobile!==undefined&&result.mobile!==player.mobile)return{applied:false,reason:'Góc/lực không thuộc xe hiện tại'};if(!Number.isFinite(result.power)||result.power<1||result.power>400||!Number.isFinite(result.angle)||![0,1].includes(result.look))return{applied:false,reason:'Góc/lực không hợp lệ'};player.Look(result.look);player.ChangeAngleTo(result.angle,true);if(player.look!==result.look||Math.abs(player.ang-result.angle)>.001)return{applied:false,reason:'Game chưa áp dụng đúng góc ngắm; chưa bắn'};return{applied:true,angle:player.ang,look:player.look,power:Math.round(result.power)};}
- const api={version:21,find,apply};for(const name of ['__reaAdukaAutoAim','__reaDragonAutoAim'])Object.defineProperty(globalThis,name,{value:api,configurable:true});return{installed:true,version:21,mobiles:['Aduka','Boomer','Ice','Turtle','Nak','Raon','Grub'],fullLegalAngleSearch:true,terrainModes:true,fractionalAngleLock:true};
+ function apply(player,result){if(!result?.ready)return{applied:false,reason:result?.reason||'Chưa có nghiệm'};if(![2,11,14,15,17,19,21].includes(player.mobile)&&!['Ice','Turtle','Nak','Raon','Raon Launcher','Grub','Frog'].includes(player.mobile_data?.name)||result.mobile!==undefined&&result.mobile!==player.mobile)return{applied:false,reason:'Góc/lực không thuộc xe hiện tại'};if(!Number.isFinite(result.power)||result.power<1||result.power>400||!Number.isFinite(result.angle)||![0,1].includes(result.look))return{applied:false,reason:'Góc/lực không hợp lệ'};player.Look(result.look);player.ChangeAngleTo(result.angle,true);if(player.look!==result.look||Math.abs(player.ang-result.angle)>.001)return{applied:false,reason:'Game chưa áp dụng đúng góc ngắm; chưa bắn'};return{applied:true,angle:player.ang,look:player.look,power:Math.round(result.power)};}
+ const api={version:22,find,apply};for(const name of ['__reaAdukaAutoAim','__reaDragonAutoAim'])Object.defineProperty(globalThis,name,{value:api,configurable:true});return{installed:true,version:22,mobiles:['Aduka','Boomer','Ice','Turtle','Nak','Raon','Grub','Frog'],fullLegalAngleSearch:true,terrainModes:true,fractionalAngleLock:true};
 })()

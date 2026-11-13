@@ -1,6 +1,6 @@
 # DragonBound Aimbot
 
-Trajectory prediction, angle and power assistance, and a Windows one-click launcher for DragonBound. The current application is **V35**, with early Turtle SS aim display while refinement continues, automatic style comparison and visible model uncertainty, alongside bounded Boomer searches and Mouse 5 shooting.
+Trajectory prediction, angle and power assistance, and a Windows one-click launcher for DragonBound. The current application is **V36**, adding Frog S1/S2/SS carrier and estimated surface-endpoint assistance alongside early Turtle SS aim, bounded Boomer searches and Mouse 5 shooting.
 
 ## Introduction
 
@@ -21,6 +21,7 @@ The launcher finds the game tab automatically, follows new matches and restores 
 | Nak | S1/SS flight and S2 terrain entry, underground segment and exit search | Complex underground geometry is estimated |
 | Raon Launcher | Three S1 streams; two S2 landing points; SS robot landing point | Mine/robot movement and later detonation are not predicted |
 | Grub | S1/S2/SS, four separate S2 projectiles, estimated terrain bounces | Left-facing spread, complex bounce normals and SS repeated damage remain unverified |
+| Frog | Shared S1/S2 carrier, separate SS, estimated terrain motion and endpoint search | Initial calibration is from low-force samples; surface speed, edges, walls and damage remain estimates |
 
 See [Usage](docs/USAGE.md) for controls and [Known issues and fixes](docs/KNOWN_ISSUES.md) for the remaining work.
 

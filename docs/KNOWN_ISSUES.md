@@ -11,6 +11,7 @@ V29 removes the false S2 rectangle stop, adds conservative wind coverage and mir
 | Area | What needs fixing or validation | Completion criterion |
 | --- | --- | --- |
 | Wind across mobiles | Several initial models extrapolate unmeasured wind using an inferred factor; universal coverage is not established | Compare predicted versus received launch acceleration and impact over multiple wind directions/strengths and independent matches |
+| Frog carrier and surface endpoint | V36 adds carrier calibration and estimated post-contact motion; initial own launches are low-force, and surface contours/edges/weather are not recovered | Validate moderate/high-force launches and entire continuation paths against shot-time terrain, then compare final explosion separately from first contact |
 | Grub bounce direction | Current terrain normals are estimated; historical native normal accuracy is unverified | Capture terrain at contact and compare incoming/outgoing vectors on flat ground, slopes, walls and damaged terrain |
 | Grub left-facing S2 | The empirical fan was observed in right-facing bursts only | Capture matched left/right bursts and establish angle-offset mirroring/order before treating it as confirmed |
 | Grub SS | First-contact aim is implemented; rolling, repeated damage and a general SS lifetime remain unresolved | Record a complete SS after contact and identify transitions and damage timing independently of tornado jumps |

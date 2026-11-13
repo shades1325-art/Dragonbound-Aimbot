@@ -81,6 +81,12 @@ Ten recorded complete splits began opening at2.10seconds and released60 fragment
 
 The panel distinguishes the wider proximity count from contacts in the tight14px horizontal window and reports centering, carrier uncertainty and one-power sensitivity. A sparse verified estimate can remain visible, labelled weak when fewer than three tight contacts are available. These are engineering diagnostics, not native damage radii. Low confidence can remain after switching to Timebomb: both styles share the carrier's launch-model error. Ordinary shots automatically refine the current-match model; a single low-power sample leaves a broad high-power interval. Bootstrap, inferred wind and weather can still produce misses despite a narrow nominal cluster.
 
+### Frog
+
+Select Frog and S1, S2 or SS normally. The overlay recognizes the shared S1/S2 carrier and separate SS automatically. Select the target, review the air path plus orange dashed surface estimate, then use F8 to apply or Mouse5/the shoot button to apply and fire a ready suggestion. Normal firing guards and the game's SS availability still apply.
+
+The search targets the estimated endpoint after surface motion, not just the first landing. S1 estimates net-left motion and S2/SS net-right; the panel reports the duration, estimated endpoint error and unknown edge/wall conditions. Compatible current-match shots refine the carrier model across shot changes. The initial model comes from low-force observations, and surface walking remains approximate. See [Frog models](FROG_MODELS.md) for the evidence and remaining work.
+
 ### Nak
 
 S2 marks terrain entry and draws the underground portion separately before estimating the exit. Passing through the target's airborne body rectangle is not enough to qualify as an underground hit. S1 and SS use their ordinary flight carriers.

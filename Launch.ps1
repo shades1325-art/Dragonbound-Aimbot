@@ -59,7 +59,7 @@ $timer.Add_Tick({
         $label.Text = "Could not connect to Chrome.`r`nEnable remote debugging at chrome://inspect/#remote-debugging, then run the launcher again.`r`n" + $current.message
         $timer.Stop()
     } elseif ($current.state -eq 'running' -and $current.appliedRequestId -eq $requestId) {
-        $label.Text = "AUTO AIM LOADED`r`nAduka / Boomer / ICE / Turtle / Nak / Raon / Grub.`r`nWind, angle, power and trajectory assistance.`r`nAutomatically restores after reloading this Chrome tab."
+        $label.Text = "AUTO AIM LOADED`r`nAduka / Boomer / ICE / Turtle / Nak / Raon / Grub / Frog.`r`nWind, angle, power and trajectory assistance.`r`nAutomatically restores after reloading this Chrome tab."
         if ($null -eq $script:doneAt) { $script:doneAt = (Get-Date).AddSeconds(3) }
         if ((Get-Date) -gt $script:doneAt) { $form.Close() }
     } elseif ($current.state -eq 'waiting-for-game-tab') {

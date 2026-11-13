@@ -1,6 +1,6 @@
 (() => {
  const DEG=Math.PI/180;
- function bulletsOf(player,shot=player.selected_shot){const list=player.mobile_data?.bullets;if(!list)return[];if(player.mobile===19||['Raon','Raon Launcher'].includes(player.mobile_data?.name))return(shot===0?[list[0]]:shot===1?[list[1],list[2]]:shot===2?[list[3],list[4]]:[]).filter(Number.isFinite);if(player.mobile===11||player.mobile_data?.name==='Nak')return(shot===0?[list[0]]:shot===1?[list[1],list[2]]:shot===2?[list[3]]:[]).filter(Number.isFinite);if(player.mobile===14||player.mobile_data?.name==='Turtle')return(shot===0?[list[0]]:shot===1?[list[1],list[2]]:shot===2?[list[3],list[4]]:[]).filter(Number.isFinite);return[(player.mobile===15||player.mobile_data?.name==='Boomer')?list[shot===2?1:0]:list[shot]].filter(Number.isFinite);}
+ function bulletsOf(player,shot=player.selected_shot){if(player?.mobile===21||player?.mobile_data?.name==='Frog')return[0,1,2].includes(shot)?[player.mobile_data?.bullets?.[shot===2?1:0]].filter(Number.isFinite):[];const list=player.mobile_data?.bullets;if(!list)return[];if(player.mobile===19||['Raon','Raon Launcher'].includes(player.mobile_data?.name))return(shot===0?[list[0]]:shot===1?[list[1],list[2]]:shot===2?[list[3],list[4]]:[]).filter(Number.isFinite);if(player.mobile===11||player.mobile_data?.name==='Nak')return(shot===0?[list[0]]:shot===1?[list[1],list[2]]:shot===2?[list[3]]:[]).filter(Number.isFinite);if(player.mobile===14||player.mobile_data?.name==='Turtle')return(shot===0?[list[0]]:shot===1?[list[1],list[2]]:shot===2?[list[3],list[4]]:[]).filter(Number.isFinite);return[(player.mobile===15||player.mobile_data?.name==='Boomer')?list[shot===2?1:0]:list[shot]].filter(Number.isFinite);}
  function bulletOf(player,shot=player.selected_shot){return bulletsOf(player,shot)[0];}
  function roots(a,b,c){const epsilon=1e-10;if(Math.abs(a)<epsilon)return Math.abs(b)<epsilon?[]:[-c/b];const discriminant=b*b-4*a*c;if(discriminant<0)return[];const sqrt=Math.sqrt(discriminant);if(sqrt<epsilon)return[-b/(2*a)];const q=-.5*(b+(b<0?-sqrt:sqrt));return[q/a,c/q].filter(Number.isFinite).sort((a,b)=>a-b);}
  function segment(start,timeMs,jumps=[]){let chosen=null;for(const jump of jumps)if(timeMs>=jump[0])chosen=jump;
@@ -23,6 +23,6 @@
   }return result;
  }
  function turningPoint(start){const vx=Math.cos(start.ang*DEG)*start.power;if(Math.abs(start.ax)<1e-10)return null;const t=-vx/start.ax;return t>0?{...positionAt(start,t*1000),t}:null;}
- const api={version:5,bulletOf,bulletsOf,roots,segment,positionAt,velocityAt,positionAtPath,fitPathBallistics,tornadoBands,firstTornadoEntry,turningPoint};
+ const api={version:6,bulletOf,bulletsOf,roots,segment,positionAt,velocityAt,positionAtPath,fitPathBallistics,tornadoBands,firstTornadoEntry,turningPoint};
  Object.defineProperty(globalThis,'__reaDragonBallistics',{value:api,configurable:true});return{installed:true,version:api.version};
 })()
