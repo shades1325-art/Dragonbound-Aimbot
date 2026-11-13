@@ -85,7 +85,11 @@ The panel distinguishes the wider proximity count from contacts in the tight14px
 
 Select Frog and S1, S2 or SS normally. The overlay recognizes the shared S1/S2 carrier and separate SS automatically. Select the target, review the air path plus orange dashed surface estimate, then use F8 to apply or Mouse5/the shoot button to apply and fire a ready suggestion. Normal firing guards and the game's SS availability still apply.
 
-The search targets the estimated endpoint after surface motion, not just the first landing. S1 estimates net-left motion and S2/SS net-right; the panel reports the duration, estimated endpoint error and unknown edge/wall conditions. Compatible current-match shots refine the carrier model across shot changes. The initial model comes from low-force observations, and surface walking remains approximate. See [Frog models](FROG_MODELS.md) for the evidence and remaining work.
+V37 estimates how close the entire surface path comes to the target and how long it remains nearby. S1 estimates net-left motion and S2/SS net-right; player proximity changes its estimated surface speed. The panel reports path proximity/time, final-endpoint distance, angle coverage and unknown edge/wall conditions. These are estimates, not damage probabilities. Estimated self/ally exposure prevents a suggestion from becoming ready.
+
+Use **High** to prefer higher feasible angles, or lock a displayed angle to solve force there. The search includes fractional legal boundaries and both valid flight roots, then spreads checks across angles before spending more checks on the same angle. A bounded10second flight extension is marked as extrapolation when needed; native angle/power limits still apply. A ready path stays visible while refinement continues.
+
+Compatible current-match shots refine the carrier ratio and rounded wind factor across shot changes. The initial prior can be wrong in a new match; recent observations show different ratios and wind factors between matches. No universal first-shot accuracy follows from the calibration tests. Surface walking, player interaction, SS and weather remain approximate. See [Frog models](FROG_MODELS.md).
 
 ### Nak
 

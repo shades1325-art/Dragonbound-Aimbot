@@ -2,6 +2,15 @@
 
 This log uses the overlay's historical version numbers. The initial Git import contains the V27 baseline; earlier entries summarize local development milestones rather than Git tags or independently published releases.
 
+## V37 — Frog angle coverage and observed miss corrections — 2026-11-14
+
+- Replace the24-path shortlist with progressive angle coverage, landing-goal diversity and local power refinement. Include fractional native angle boundaries, both valid inverse flight roots and bounded longer flight estimates. Preserve the high-angle preference in final ranking and retain ready aim while refining.
+- Show checked/feasible angle counts. Total full checks are capped at192 across all stages, with a soft8ms update budget and160-update burst cap. A single trace can overrun; this is not a guarantee that every wind/terrain combination is solvable.
+- Fit current-match rounded wind-factor/gravity intervals instead of transferring the initial3.4 coefficient unchanged. Five later own launches have ratio near2.45 and wind factor near3.28; leave-one-launch-out predictions reproduce their launch speeds and accelerations within one unit.
+- Replace constant50px/s surface motion with an empirical two-rate estimate: about85px/s away from players and30px/s near their feet. The24px proximity window is an ordinary-path fit, not a recovered native collider or damage radius; SS remains less certain.
+- Score estimated target proximity/dwell along the surface path, with self/ally exposure rejection. Recorded damage can accompany a path whose final point is far from the player, so final-endpoint centering is no longer the only acceptance criterion.
+- Preserve player/terrain snapshots on user-fired Frog shots for future independent comparisons. Add native medium-force/contact fixtures and regressions for the newly observed failures.
+
 ## V36 — Frog assistance — 2026-11-14
 
 - Add Frog S1/S2/SS recognition to model selection, overlay, angle/power application, firing and launcher recovery. S1/S2 share carrier64, SS uses66; continuations65/67 are linked to a unique matching parent rather than the nearest player.
