@@ -20,7 +20,7 @@
   const hull=[...lower.slice(0,-1),...upper.slice(0,-1)],inside=hull.every((p,i)=>cross(p,hull[(i+1)%hull.length],current)>=-1e-8);
   return{...info,supported:inside,reason:inside?'interpolated-coverage':'outside-observed-wind-region'};
  }
- function annotate(model,p){const pair=p.selected_shot===1,ss=p.selected_shot===2,c=globalThis.__reaDragonCollector,ssMode=ss?(globalThis.__reaDragonAim?.settings?.turtleSSMode??'skybomb'):null,timing=ss?globalThis.__reaTurtleSS?.fuse([...(c?.calibration??[]),...(c?.samples??[])],c?.session):null;return{...model,turtle:true,turtlePair:pair,turtleSS:ss,turtleSSMode:ssMode,ssOpeningMs:timing?.openingMs,ssReleaseMs:timing?.releaseMs,ssTimingEstimated:!!timing,provisional:model.provisional||pair||ss,waveMappingEstimated:pair,maxTime:ss&&timing?timing.openingMs/1000:6.5};}
+ function annotate(model,p){const pair=p.selected_shot===1,ss=p.selected_shot===2,c=globalThis.__reaDragonCollector,ssMode=ss?(globalThis.__reaDragonAim?.settings?.turtleSSMode??'auto'):null,timing=ss?globalThis.__reaTurtleSS?.fuse([...(c?.calibration??[]),...(c?.samples??[])],c?.session):null;return{...model,turtle:true,turtlePair:pair,turtleSS:ss,turtleSSMode:ssMode,ssOpeningMs:timing?.openingMs,ssReleaseMs:timing?.releaseMs,ssTimingEstimated:!!timing,provisional:model.provisional||pair||ss,waveMappingEstimated:pair,maxTime:ss&&timing?timing.openingMs/1000:6.5};}
  function fit(samples,d,p,session){
   if(!isTurtle(p)||![0,1,2].includes(p.selected_shot)||!finite(d.wind_power)||d.wind_power<0||d.wind_power>26||!finite(d.wind_angle))return null;
   const kernel=globalThis.__reaDragonBallistics,seen=new Set(),rows=samples.filter(r=>{
@@ -31,8 +31,8 @@
    const key=JSON.stringify([r.session,r.start,r.shotType,r.uiPower]);if(seen.has(key))return false;seen.add(key);return true;
   });
   if(!rows.length)return seed(d,p);
-  let ratio=rows.reduce((n,r)=>n+r.uiPower*r.start.power,0)/rows.reduce((n,r)=>n+r.uiPower*r.uiPower,0),quantization=null;
-  for(const [mode,offset] of [['round',.5],['floor',0]]){const low=Math.max(...rows.map(r=>(r.start.power-offset)/r.uiPower)),high=Math.min(...rows.map(r=>(r.start.power+1-offset)/r.uiPower));if(low<high){ratio=(low+high)/2;quantization=mode;break;}}
+  let ratio=rows.reduce((n,r)=>n+r.uiPower*r.start.power,0)/rows.reduce((n,r)=>n+r.uiPower*r.uiPower,0),quantization=null,ratioLow=null,ratioHigh=null;
+  for(const [mode,offset] of [['round',.5],['floor',0]]){const low=Math.max(...rows.map(r=>(r.start.power-offset)/r.uiPower)),high=Math.min(...rows.map(r=>(r.start.power+1-offset)/r.uiPower));if(low<high){if(quantization===null){ratio=(low+high)/2;quantization=mode;}ratioLow=ratioLow===null?low:Math.min(ratioLow,low);ratioHigh=ratioHigh===null?high:Math.max(ratioHigh,high);}}
   const speed=force=>quantization==='round'?Math.round(force*ratio):quantization==='floor'?Math.floor(force*ratio):force*ratio,velocityError=Math.max(...rows.map(r=>Math.abs(speed(r.uiPower)-r.start.power)));
   if(!(ratio>0)||velocityError>1.2)return seed(d,p);
   const values=rows.map(r=>({...vector(r.wind),ax:r.start.ax,ay:r.start.ay})),mean=k=>values.reduce((n,v)=>n+v[k],0)/values.length,mx=mean('x'),my=mean('y'),ma=mean('ax'),mg=mean('ay'),den=values.reduce((n,v)=>n+(v.x-mx)**2+(v.y-my)**2,0);
@@ -43,8 +43,9 @@
   if(exact.length){ax=median(exact.map(r=>r.start.ax));ay=median(exact.map(r=>r.start.ay));if(exact.some(r=>Math.hypot(r.start.ax-ax,r.start.ay-ay)>2))return seed(d,p);}
   else if(law){ax=law.biasX+law.factor*current.x;ay=law.gravity+law.factor*current.y;}
   else{const anchor=rows.toSorted((a,b)=>b.time-a.time)[0],v=vector(anchor.wind),factor=globalThis.__reaTurtlePrior?.data?.windFactor??4;ax=anchor.start.ax+factor*(current.x-v.x);ay=anchor.start.ay+factor*(current.y-v.y);windInferred=true;}
+  const ratioError=finite(ratioLow)&&finite(ratioHigh)?Math.max(ratio-ratioLow,ratioHigh-ratio):velocityError/Math.max(1,...rows.map(r=>r.uiPower));
   const specific=rows.filter(r=>r.shotType===p.selected_shot),estimated=!exact.length||specific.length===0||rows.length<2;
-  return annotate({valid:true,ratio,speedQuantization:quantization,ax,ay,dx:0,dy:0,sampleCount:rows.length,exactWindSamples:exact.length,minPower:Math.min(...rows.map(r=>r.uiPower)),maxPower:Math.max(...rows.map(r=>r.uiPower)),velocityError,windModel:law,windCoverage:{...coverage,mode:exact.length?'exact':law?'interpolated':'anchor-estimate'},windFallback:!exact.length,windInferred,provisional:estimated,positionAllowance:(power,t)=>3+(velocityError+1)*t+(windInferred?12:!exact.length?3:1)*t*t,reason:null},p);
+  return annotate({valid:true,ratio,speedQuantization:quantization,ax,ay,dx:0,dy:0,sampleCount:rows.length,exactWindSamples:exact.length,minPower:Math.min(...rows.map(r=>r.uiPower)),maxPower:Math.max(...rows.map(r=>r.uiPower)),velocityError,ratioError,ratioInterval:finite(ratioLow)?[ratioLow,ratioHigh]:null,windModel:law,windCoverage:{...coverage,mode:exact.length?'exact':law?'interpolated':'anchor-estimate'},windFallback:!exact.length,windInferred,provisional:estimated,positionAllowance:(power,t)=>3+(velocityError+1+ratioError*power)*t+(windInferred?12:!exact.length?3:1)*t*t,reason:null},p);
  }
  function seed(d,p){
   const q=globalThis.__reaTurtlePrior?.data;if(!isTurtle(p)||!q||!finite(d.wind_power)||d.wind_power<0||d.wind_power>26||!finite(d.wind_angle))return null;
@@ -62,5 +63,5 @@
   const hits=branches.filter(b=>b.hit?.type==='target'),hit=hits.toSorted((a,b)=>b.hit.t-a.hit.t)[0]?.hit??branches.find(b=>b.hit)?.hit??null;
   return{points:branches[0].points,hit,branches,pairHits:hits.length,turtlePair:true,waveMappingEstimated:true,horizon:duration,tornadoEntry:null,weatherHandled:jumps.length>0,weatherTransitions:jumps.length};
  }
- Object.defineProperty(globalThis,'__reaTurtleModel',{value:{version:2,fit,seed,tracePair,isTurtle},configurable:true});return{installed:true,mobile:'Turtle',version:2};
+ Object.defineProperty(globalThis,'__reaTurtleModel',{value:{version:3,fit,seed,tracePair,isTurtle},configurable:true});return{installed:true,mobile:'Turtle',version:3};
 })()

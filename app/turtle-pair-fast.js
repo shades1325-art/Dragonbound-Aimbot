@@ -11,5 +11,5 @@
    }if(branches.every(b=>b.hit))break;}
   const hits=branches.filter(b=>b.hit?.type==='ground'&&!b.hit.clearanceOnly&&target&&Math.abs(b.hit.x-target.x)<=radius&&Math.abs(b.hit.y-target.y)<=vertical),hit=hits.toSorted((a,b)=>Math.abs(a.hit.x-target.x)-Math.abs(b.hit.x-target.x))[0]?.hit??branches.find(b=>b.hit&&b.hit.type!=='bounds')?.hit??null,end=Math.max(0,...branches.map(b=>b.hit?.t??duration));return{points:branches[0].points,hit,branches,pairHits:hits.length,pairGround:true,turtlePair:true,mirrorReflections:(weather?.reflections??[]).filter(r=>r.timeMs/1000<=end),tornadoTransitions:Math.max(0,jumps.length-(weather?.reflections?.length??0)),waveMappingEstimated:true,horizon:duration,tornadoEntry:null,weatherHandled:jumps.length>0,weatherTransitions:jumps.length};
  }
- const previousTracePair=model.previousTracePair??model.tracePair;Object.defineProperty(globalThis,'__reaTurtleModel',{value:{...model,version:5,tracePair,previousTracePair},configurable:true});return{installed:true,version:5,preparedPairTrace:true};
+ const previousTracePair=model.previousTracePair??model.tracePair;Object.defineProperty(globalThis,'__reaTurtleModel',{value:{...model,version:6,tracePair,previousTracePair},configurable:true});return{installed:true,version:6,preparedPairTrace:true};
 })()

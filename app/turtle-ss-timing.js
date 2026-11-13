@@ -1,7 +1,7 @@
 // Turtle SS timing. Received descriptors are exact in the projectile clock;
-// pre-shot fuse reuse is an explicitly provisional estimate from six observed splits.
+// pre-shot fuse reuse is an explicitly provisional estimate from ten observed splits.
 (()=>{
- const finite=Number.isFinite,median=a=>{const v=a.toSorted((x,y)=>x-y);return(v[(v.length-1)>>1]+v[v.length>>1])/2;},fallback={openingMs:2100,pauseMs:500,releaseMs:2600,observations:7,source:'observed-split'};
+ const finite=Number.isFinite,median=a=>{const v=a.toSorted((x,y)=>x-y);return(v[(v.length-1)>>1]+v[v.length>>1])/2;},fallback={openingMs:2100,pauseMs:500,releaseMs:2600,observations:10,source:'observed-split'};
  const key=r=>JSON.stringify([r.session,r.time,r.bullet,r.start,r.flightMs,r.change,r.impact]);
  function unique(records){const seen=new Set();return(records??[]).filter(r=>{if(![48,49].includes(r.bullet))return false;const k=key(r);if(seen.has(k))return false;seen.add(k);return true;});}
  function ownedParents(records){return unique(records).filter(r=>r.bullet===48&&r.isLocal&&r.shotType===2&&r.start&&finite(r.flightMs));}

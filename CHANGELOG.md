@@ -2,6 +2,21 @@
 
 This log uses the overlay's historical version numbers. The initial Git import contains the V27 baseline; earlier entries summarize local development milestones rather than Git tags or independently published releases.
 
+## V34 — Turtle SS selection and placement confidence — 2026-11-13
+
+### Changed
+
+- Add automatic comparison of Timebomb and Skybomb with one common geometric score and a shared full-candidate budget. Explicit mode choices remain available.
+- Rank tight contacts within14px before the wider28px proximity count, then center error, cluster width, power sensitivity and carrier uncertainty. Require at least three tight terrain contacts by default. These windows are engineering criteria, not recovered damage radii.
+- Permit a verified partial cluster when another fragment has no target-plane crossing within the child horizon. Timebomb requires a descending opening above the target.
+- Carry feasible round/floor launch-ratio intervals from calibration into the uncertainty allowance, including high-power extrapolation from low-power samples.
+- Display chosen style, tight count, centering, one-power sensitivity and low-confidence estimates. Preserve mirror preference between equal-count styles.
+- Resume analytic seeds and fragment traces across short production updates, targeting8ms between operations. Avoid duplicate SS previews while automatic search is active; cache scene results across self-applied angle changes and check sampled terrain before reuse.
+
+### Validation boundary
+
+Ten retained native split events reproduce60 fragment descriptors. They do not establish pre-shot hit accuracy: matched first-shot captures already show20.57px and73.67px opening errors from launch-model differences. Timing and fragment generation are retained; no arbitrary fuse offset or damage radius is introduced. Weather-transformed splitting and native body/splash collisions remain unverified. The time budget is soft and one prediction/trace can overrun it.
+
 ## V33 — Boomer search responsiveness and high arcs — 2026-11-13
 
 ### Fixed

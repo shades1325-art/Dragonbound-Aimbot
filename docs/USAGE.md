@@ -33,7 +33,7 @@ The in-game panel currently uses Vietnamese labels. This table describes the con
 | Target drop-down | Select the player to aim toward |
 | Arc-mode drop-down | Automatic, high arc or fixed displayed angle |
 | Boomer method | Select a physics model or reference formula; visible for Boomer |
-| Turtle SS mode | Choose Skybomb, Timebomb or direct impact; visible for Turtle SS |
+| Turtle SS mode | Choose Auto, Skybomb, Timebomb or direct impact; visible for Turtle SS |
 | Mirror preference | Prefer a reflected Turtle path when predicted contact counts are preserved; shown during mirror weather |
 | Auto Learn area | Start/stop optional Boomer bot-room sampling |
 | Angle input and +/- buttons | Lock and adjust the displayed angle by one degree |
@@ -68,15 +68,18 @@ Reference advice comes from older Gunbound guides and has explicit unavailable r
 
 ### Turtle
 
-For SS, choose **Timebomb** to search for a split close to the target, **Skybomb** to search for a split near the apex above the target, or **direct impact** to land the carrier before it opens. Timebomb solves angle and power together using the current wind acceleration, target elevation and observed opening/release times, then traces all six fragments. It does not require a fresh pair of shots merely because you change SS mode. An inferred wind model remains uncertain. When a chosen mode has no solution, try the other split mode or move to obtain a usable angle; the solver does not silently change your selection. See the [reference notes](TURTLE_REFERENCE.md).
+For SS, choose **Auto** to compare Timebomb and Skybomb using one geometric score. Select **Timebomb** for a descending split close to the target, **Skybomb** for an opening near the apex, or **direct impact** to land the carrier before it opens. Explicit choices remain honored. Timebomb solves angle and power together using current wind, target elevation and observed timing. Switching modes does not require two extra calibration shots. See the [reference notes](TURTLE_REFERENCE.md).
 
-S2 draws both wave trajectories through the possible body-contact region toward predicted terrain contact. The orange dashed continuation is uncertain because the native body collider is not recovered. Counts describe predicted terrain landings near the feet, not confirmed damage. Current-match wind samples take priority; sparse directional coverage uses an explicitly inferred fallback rather than a global fitted law. SS offers three modes:
+S2 draws both wave trajectories through the possible body-contact region toward predicted terrain contact. The orange dashed continuation is uncertain because the native body collider is not recovered. Counts describe predicted terrain landings near the feet, not confirmed damage. Current-match wind samples take priority; sparse directional coverage uses an explicitly inferred fallback rather than a global fitted law. SS offers four modes:
 
+- **Auto:** compare both split styles; prefer tight contacts and centering before wider fringe contacts. Show why the alternative lacks a suitable cluster.
 - **Skybomb:** seek a split near the apex and forecast six fragments and their landing spread.
 - **Timebomb:** seek a split near the target and short fragment flights, adjusting angle and power together.
 - **Direct impact:** seek terrain contact near the target's feet before the carrier splits.
 
-Seven recorded complete splits began opening at 2.10 seconds and released fragments at 2.60 seconds. Those observations inform the model; they are not a universal timing guarantee across all conditions. The timing display follows the chosen path/model and remains visible when the main panel is hidden. The search refines integer power near promising candidates and expands its power window when the initial seeds cannot place all six fragments near the target.
+Ten recorded complete splits began opening at2.10seconds and released60 fragments at2.60seconds. Those observations inform the model; they are not a universal timing guarantee. The timing display follows the chosen path/model and remains visible when the main panel is hidden. Searches progress across short updates; a pending result cannot fire through the aim button.
+
+The panel distinguishes the wider proximity count from contacts in the tight14px horizontal window and reports centering, carrier uncertainty and one-power sensitivity. These are engineering diagnostics, not native damage radii. Low confidence can remain after switching to Timebomb: both styles share the carrier's launch-model error. Ordinary shots automatically refine the current-match model; a single low-power sample leaves a broad high-power interval. Bootstrap, inferred wind and weather can still produce misses despite a narrow nominal cluster.
 
 ### Nak
 

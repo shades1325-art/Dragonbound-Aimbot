@@ -16,6 +16,13 @@ function row({ui=230,speed=Math.round(ui*2.24),wind,ax,ay,time=1,session=1,angle
 const first=row({ui:230,speed:515,wind:{power:11,angle:85},ax:0,ay:358,time:1});
 const second=row({ui:240,speed:538,wind:{power:13,angle:85},ax:3,ay:351,time:2});
 const third=row({ui:263,speed:589,wind:{power:4,angle:229},ax:-12,ay:413,time:3,angle:124});
+test('a single low-power sample retains its quantization interval at higher powers',()=>{
+ const low=row({ui:22,speed:49,wind:{power:0,angle:0},ax:0,ay:390}),fit=model.fit([low],{wind_power:0,wind_angle:0},player,1);
+ assert.ok(fit.valid);assert.ok(fit.ratioError>0.04);assert.ok(Math.abs(fit.ratioInterval[1]-fit.ratioInterval[0]-1.5/22)<1e-10);
+ assert.ok(fit.positionAllowance(350,2.1)>fit.positionAllowance(22,2.1)+15);
+ const high=row({ui:350,speed:780,wind:{power:0,angle:0},ax:0,ay:390,time:2}),refined=model.fit([low,high],{wind_power:0,wind_angle:0},player,1);
+ assert.ok(refined.ratioError<fit.ratioError);assert.ok(refined.positionAllowance(350,2.1)<fit.positionAllowance(350,2.1));
+});
 
 test('two observed winds do not manufacture a global law in a new direction',()=>{
  const fit=model.fit([first,second],{wind_power:4,wind_angle:229},player,1);

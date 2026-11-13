@@ -7,9 +7,9 @@ import {overlayFixture} from './helpers/overlay-fixture.mjs';
 const app=new URL('../app/',import.meta.url),c=vm.createContext({Math,Date});
 for(const f of ['ballistics-v2.js','turtle-ss-timing.js','turtle-skybomb.js'])vm.runInContext(await readFile(new URL(f,app),'utf8'),c);
 const sky=c.__reaTurtleSky,timing=c.__reaTurtleSS;
-test('seven anonymized native split events reproduce all 42 fragments',async()=>{
- const fixture=JSON.parse(await readFile(new URL('./fixtures/turtle-ss-splits.json',import.meta.url),'utf8'));assert.equal(fixture.events.length,7);let count=0;
- for(const e of fixture.events){const starts=sky.fragmentStarts(e.start,e.openingMs,e.releaseMs,e.jumps);for(const child of e.children){const found=starts.find(s=>s.ang===(child.ang%360+360)%360);assert.ok(found);for(const key of ['x','y','power','ax','ay','t'])assert.equal(found[key],child[key]);count++;}}assert.equal(count,42);
+test('ten anonymized native split events reproduce all 60 fragments',async()=>{
+ const fixture=JSON.parse(await readFile(new URL('./fixtures/turtle-ss-splits.json',import.meta.url),'utf8'));assert.equal(fixture.events.length,10);let count=0;
+ for(const e of fixture.events){const starts=sky.fragmentStarts(e.start,e.openingMs,e.releaseMs,e.jumps);for(const child of e.children){const found=starts.find(s=>s.ang===(child.ang%360+360)%360);assert.ok(found);for(const key of ['x','y','power','ax','ay','t'])assert.equal(found[key],child[key]);count++;}}assert.equal(count,60);
 });
 test('forecast follows path timing, then model timing, before observed defaults',()=>{
  const m={turtleSS:true,ratio:2,ax:0,ay:390,ssOpeningMs:2000,ssReleaseMs:2500},o={x:0,y:0,angle:90};
@@ -68,8 +68,54 @@ test('the shared solver routes Timebomb through split physics even with mirror w
 });
 test('the panel exposes Timebomb and changing modes invalidates previous aim',async()=>{
  const h=await overlayFixture(),select=h.nodes.get('rea-turtle-ss-mode');
- assert.deepEqual(select.children.map(o=>o.value),['skybomb','timebomb','direct']);
+ assert.deepEqual(select.children.map(o=>o.value),['auto','skybomb','timebomb','direct']);
  let cleared=0;h.context.__reaTurtleSky={clearCache(){cleared++;}};
  h.aim.autoResult={ready:true};h.aim.models.set('old',{});select.value='timebomb';select.listeners.change();
  assert.equal(h.aim.settings.turtleSSMode,'timebomb');assert.equal(h.aim.autoResult,null);assert.equal(h.aim.models.size,0);assert.equal(cleared,1);assert.equal(h.calls.length,0);
+});
+test('automatic SS compares both styles within one shared full-candidate budget',()=>{
+ for(const x of [250,400,600,800]){
+  const h=apiFixture({targetX:x}),before=sky.stats().fullCandidates,r=sky.find(h.api,h.d,h.m,h.p,h.target,{turtleSSMode:'auto',now:()=>5000});
+  assert.equal(r.ssSelectionAuto,true);assert.equal(r.ssAlternatives.length,2);assert.ok(sky.stats().fullCandidates-before<=12);
+  const ready=r.ssAlternatives.filter(a=>a.ready);assert.equal(r.ready,ready.length>0);
+  if(r.ready){assert.equal(r.accuracyScore,Math.min(...ready.map(a=>a.score)));assert.ok(r.predictedCoreCount>=3);assert.equal(r.predictedHit,false);}
+ }
+});
+test('automatic SS can choose Timebomb and never forces a partial Skybomb over a tighter cluster',()=>{
+ const h=apiFixture({targetX:200}),r=sky.find(h.api,h.d,h.m,h.p,h.target,{turtleSSMode:'auto',now:()=>6000});
+ assert.ok(r.ready,r.reason);assert.equal(r.ssMode,'timebomb');assert.equal(r.turtleTimebomb,true);
+});
+test('Timebomb accepts a verified partial cluster when the sixth fragment exceeds the child horizon',()=>{
+ const h=apiFixture({targetX:400}),r=sky.find(h.api,h.d,h.m,h.p,h.target,{turtleSSMode:'timebomb',childHorizon:.1,now:()=>6500});
+ assert.ok(r.ready,r.reason);assert.ok(r.predictedCoreCount>=3);assert.ok(r.path.childPaths.some(c=>!c.hit));assert.ok(r.path.childPaths.filter(c=>c.hit?.type==='ground').length>=3);
+});
+test('a tight five-fragment cluster outranks six fringe contacts',()=>{
+ const target={x:100,y:0},tight=sky.footprint([96,98,100,102,104].map(x=>({x,y:0})),target),fringe=sky.footprint([120,121,122,123,124,125].map(x=>({x,y:0})),target);
+ assert.equal(tight.coreCount,5);assert.equal(fringe.nearCount,6);assert.equal(fringe.coreCount,0);assert.ok(sky.accuracyScore(tight)<sky.accuracyScore(fringe));
+});
+test('SS quality exposes carrier uncertainty and integer-power sensitivity without promising hits',()=>{
+ const h=apiFixture();h.m.positionAllowance=()=>35;
+ const r=sky.find(h.api,h.d,h.m,h.p,h.target,{turtleSSMode:'skybomb',now:()=>7000});
+ assert.ok(r.ready,r.reason);assert.equal(r.ssQuality.carrierAllowance,35);assert.equal(r.ssLowConfidence,true);assert.ok(Number.isFinite(r.ssQuality.powerSensitivity));assert.equal(r.predictedHit,false);
+ h.m.positionAllowance=()=>60;const changed=sky.find(h.api,h.d,h.m,h.p,h.target,{turtleSSMode:'skybomb',now:()=>7100});assert.notEqual(changed.cacheHit,true);assert.equal(changed.ssQuality.carrierAllowance,60);
+});
+test('the split finder honors a model-selected Timebomb when no option overrides it',()=>{
+ const h=apiFixture({targetX:400});h.m.turtleSSMode='timebomb';const r=sky.find(h.api,h.d,h.m,h.p,h.target,{now:()=>7500});assert.ok(r.ready,r.reason);assert.equal(r.ssMode,'timebomb');
+});
+test('cooperative SS resumes analytic and full traces without repeating a whole search per update',()=>{
+ const h=apiFixture({targetX:200});let r,calls=0;
+ do{r=sky.find(h.api,h.d,h.m,h.p,h.target,{turtleSSMode:'auto',cooperative:true,maxSliceSteps:64});calls++;if(r.pending){assert.ok(r.search.sliceSteps<=64);assert.equal(r.ready,false);}}while(r.pending&&calls<200);
+ assert.ok(calls>1);assert.ok(r.ready,r.reason);assert.equal(r.ssMode,'timebomb');assert.equal(r.path.childPaths.length,6);
+ const cached=sky.find(h.api,h.d,h.m,h.p,h.target,{turtleSSMode:'auto',cooperative:true,maxSliceSteps:64});assert.equal(cached.cacheHit,true);
+ h.d.groundHeightAt=()=>10;const changed=sky.find(h.api,h.d,h.m,h.p,h.target,{turtleSSMode:'auto',cooperative:true,maxSliceSteps:64});assert.notEqual(changed.cacheHit,true);assert.equal(changed.pending,true);
+});
+test('cooperative SS honors the soft clock budget between analytic powers',()=>{
+ const h=apiFixture();let clock=0;const r=sky.find(h.api,h.d,h.m,h.p,h.target,{turtleSSMode:'auto',cooperative:true,sliceNow:()=>clock++,sliceBudgetMs:2});
+ assert.equal(r.pending,true);assert.ok(r.search.sliceSteps<=2);
+});
+test('automatic application of angle and facing does not invalidate the same SS search',()=>{
+ const h=apiFixture(),r=sky.find(h.api,h.d,h.m,h.p,h.target,{turtleSSMode:'skybomb',now:()=>8000});assert.ok(r.ready,r.reason);
+ h.p.ang=r.angle;h.p.look=r.look;
+ const cached=sky.find(h.api,h.d,h.m,h.p,h.target,{turtleSSMode:'skybomb',now:()=>8100});assert.equal(cached.cacheHit,true);
+ h.target.x+=20;const moved=sky.find(h.api,h.d,h.m,h.p,h.target,{turtleSSMode:'skybomb',now:()=>8100});assert.notEqual(moved.cacheHit,true);
 });
